@@ -1,0 +1,26 @@
+graph TD
+    subgraph Public Zone
+        A(Home / Game Lobby) -- Clicks Game --> B(Game Page);
+        A -- Clicks Leaderboard --> C(Leaderboard Page);
+        B -- Clicks Back --> A;
+        C -- Clicks Back --> A;
+    end
+
+    subgraph Authentication Zone
+        D(Login Page);
+        E(Register Page);
+        D -- Needs to Register --> E;
+        E -- Already has Account --> D;
+    end
+
+    subgraph Guest Flow to User
+        B -- "Login to Save Score" --> D;
+        A -- Clicks Login --> D;
+    end
+
+    subgraph User Flow
+        D -- Login Success --> A;
+        E -- Register Success --> D;
+    end
+
+    style B fill:#f9f,stroke:#333,stroke-width:2px
