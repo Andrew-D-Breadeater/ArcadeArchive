@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcadeArchive - Leaderboard</title>
+    <!-- FONT LINKS (same as index.html) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <!-- STYLESHEET LINK -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <div class="site-name"><a href="index.html">ArcadeArchive</a></div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Main</a></li>
+                <li><a href="leaderboard.html">Leaderboard</a></li>
+                <li><a href="about.html">About Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Leaderboards</h1>
+        <p>Check out the top scores!</p>
+
+        <!-- The toggleable menu -->
+        <div class="leaderboard-nav">
+            <button class="tab-button active" data-game="pong">Pong</button>
+            <button class="tab-button" data-game="snake">Snake</button>
+            <button class="tab-button" data-game="tetris">Tetris</button>
+        </div>
+
+        <!-- The content for the leaderboards -->
+        <div class="leaderboard-content">
+            <!-- PONG LEADERBOARD (Visible by default) -->
+            <div id="pong-leaderboard" class="leaderboard-table">
+                <ol>
+                    <li><span class="name">PlayerOne</span> <span class="score">15000</span></li>
+                    <li><span class="name">RetroGamer</span> <span class="score">12500</span></li>
+                    <li><span class="name">Paddlemaster</span> <span class="score">11000</span></li>
+                </ol>
+            </div>
+
+            <!-- SNAKE LEADERBOARD (Hidden by default) -->
+            <div id="snake-leaderboard" class="leaderboard-table hidden">
+                <ol>
+                    <li><span class="name">SerpentLord</span> <span class="score">9999</span></li>
+                    <li><span class="name">AppleEater</span> <span class="score">8500</span></li>
+                    <li><span class="name">PixelHiss</span> <span class="score">7200</span></li>
+                </ol>
+            </div>
+
+            <!-- TETRIS LEADERBOARD (Hidden by default) -->
+            <div id="tetris-leaderboard" class="leaderboard-table hidden">
+                <ol>
+                    <li><span class="name">LineClearer</span> <span class="score">250000</span></li>
+                    <li><span class="name">BlockMaster</span> <span class="score">220000</span></li>
+                    <li><span class="name">T-Spinner</span> <span class="score">195000</span></li>
+                </ol>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ArcadeArchive</p>
+    </footer>
+    
+    <!-- SCRIPT LINK (at the end of the body) -->
+    <script src="app.js"></script>
+</body>
+</html>

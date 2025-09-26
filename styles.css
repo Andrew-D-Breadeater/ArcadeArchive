@@ -1,0 +1,239 @@
+/* --- Monochrome Terminal Theme --- */
+:root {
+    --bg-cream: #fdf6e3;         /* A yellowy, off-white background */
+    --text-green: #2e7d32;      /* A classic, readable terminal green */
+    --accent-bright-green: #4caf50; /* A brighter green for highlights/hovers */
+    --border-dark-green: #1b5e20; /* A darker green for borders */
+    --card-bg: #f5efdc;         /* A slightly darker cream for cards */
+}
+
+/* --- Global Styles --- */
+body {
+    background-color: var(--bg-cream);
+    color: var(--text-green);
+    font-family: 'VT323', monospace; /* Use our new pixel font */
+    font-size: 20px; /* Pixel fonts are small, so we make it bigger */
+    margin: 0;
+    line-height: 1.6;
+}
+
+a {
+    color: var(--text-green);
+    /* No underline by default, feels cleaner with this font */
+    text-decoration: none; 
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--accent-bright-green);
+}
+
+/* --- Layout Containers --- */
+header, main, footer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* --- Header & Navigation --- */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline; /* Align to the text baseline */
+    border-bottom: 2px solid var(--border-dark-green);
+    padding: 1.5rem 1rem;
+}
+
+.site-name {
+    font-size: 2.5rem; /* Make the title stand out */
+    color: var(--border-dark-green);
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2rem; 
+}
+
+nav a {
+    font-size: 1.5rem;
+}
+
+/* --- Main Content: Game List --- */
+main {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+h1 {
+    font-size: 2.2rem;
+}
+
+.game-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.game-card {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    border-radius: 0; /* Sharp corners for a retro feel */
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 7px 7px 0px 0px var(--border-dark-green);
+}
+
+.game-card h2 {
+    margin-top: 0;
+    font-size: 1.8rem;
+}
+
+/* --- Footer --- */
+footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--border-dark-green);
+    color: var(--text-green);
+}
+
+/* --- Media Query for Responsiveness --- */
+/* This block applies only when the screen width is 600px or less */
+@media (max-width: 600px) {
+    
+    header {
+        /* Change from a horizontal row to a vertical column */
+        flex-direction: column; 
+        
+        /* Add some space between the stacked logo and nav */
+        gap: 1rem; 
+    }
+
+    /* Optional but good: center the nav text on mobile */
+    nav {
+        text-align: center;
+    }
+
+    /* Make the font a bit smaller on small screens */
+    .site-name {
+        font-size: 2rem;
+    }
+
+    nav a {
+        font-size: 1.3rem;
+    }
+    .game-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Leaderboard Page Styles --- */
+.leaderboard-nav {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap; /* Allows buttons to wrap on small screens */
+    border-bottom: 2px solid var(--border-dark-green);
+    padding-bottom: 0.7rem;
+}
+
+.tab-button {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    color: var(--text-green);
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.tab-button.active {
+    background-color: var(--text-green);
+    color: var(--bg-cream);
+}
+
+.leaderboard-table.hidden {
+    display: none;
+}
+
+.leaderboard-table ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.leaderboard-table li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    margin-bottom: 0.5rem;
+}
+
+.leaderboard-table li .name {
+    font-weight: bold;
+}
+
+.leaderboard-table li .score {
+    font-weight: bold;
+    color: var(--border-dark-green);
+}
+
+/* --- Game Page Styles --- */
+.game-container {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    min-height: 400px; /* Give it some size */
+    margin: 2rem auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* Important for positioning the message */
+}
+
+#play-button {
+    background-color: var(--text-green);
+    color: var(--bg-cream);
+    font-family: 'VT323', monospace;
+    font-size: 3rem;
+    border: 2px solid var(--border-dark-green);
+    padding: 1rem 3rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#play-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 7px 7px 0px 0px var(--border-dark-green);
+}
+
+#game-message {
+    /* This creates an overlay on top of the container */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--card-bg);
+    
+    /* Center the text inside */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+}
+
+/* A general utility class to hide things */
+.hidden {
+    display: none !important;
+}
