@@ -20,6 +20,7 @@
                 <li><a href="index.html">Main</a></li>
                 <li><a href="leaderboard.html">Leaderboard</a></li>
                 <li><a href="about.html">About Us</a></li>
+                <li><a href="auth.html" class="login-button">Login</a></li>
             </ul>
         </nav>
     </header>
@@ -35,6 +36,32 @@
             </div>
         </div>
     </main>
+
+    <!-- Modal Overlay (dims the background) -->
+    <div id="modal-overlay" class="hidden"></div>
+
+    <!-- GUEST MODAL (shows when logged out) -->
+    <div id="guest-score-modal" class="modal hidden">
+        <button class="close-cross">&times;</button>
+        <h2>Game Over!</h2>
+        <p>Your Score: <span class="modal-score">0</span></p>
+        <p>Want to save your score to the leaderboard?</p>
+        <div class="modal-actions">
+            <a href="auth.html" class="modal-button">Login / Register</a>
+            <button class="modal-button secondary close-button">Maybe Later</button>
+        </div>
+    </div>
+
+    <!-- USER MODAL (shows when logged in) -->
+    <div id="user-score-modal" class="modal hidden">
+        <button class="close-cross">&times;</button>
+        <h2>Game Over!</h2>
+        <p>Your Score: <span class="modal-score">0</span></p>
+        <p>Your score has been submitted!</p>
+        <div class="modal-actions">
+            <button class="modal-button close-button">Continue</button>
+        </div>
+    </div>
 
     <footer>
         <p>&copy; 2025 ArcadeArchive</p>

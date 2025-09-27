@@ -44,42 +44,97 @@ if (playButton && gameMessage) {
 
 // --- Dynamic Game Page Logic ---
 
-// This code block should only run if we are on the game page.
-// We can check by seeing if the 'game-title' element exists.
 const gameTitleElement = document.getElementById('game-title');
 
 if (gameTitleElement) {
-    // 1. Read the URL to find out which game to load
+    //--- Modal Logic ---
+    // --- SIMULATE LOGIN STATE ---
+    // For now, we'll use a variable. Later, this will come from the server.
+    // Change this to `true` to test the logged-in user modal.
+    let isLoggedIn = false; 
+
+    // --- Get all the modal elements ---
+    const modalOverlay = document.getElementById('modal-overlay');
+    const guestModal = document.getElementById('guest-score-modal');
+    const userModal = document.getElementById('user-score-modal');
+    const allCloseButtons = document.querySelectorAll('.close-button, .close-cross');
+
+    // --- Functions to show and hide the modal ---
+    function showScoreModal(score) {
+        modalOverlay.classList.remove('hidden');
+
+        if (isLoggedIn) {
+            // Update and show the user modal
+            userModal.querySelector('.modal-score').textContent = score;
+            userModal.classList.remove('hidden');
+        } else {
+            // Update and show the guest modal
+            guestModal.querySelector('.modal-score').textContent = score;
+            guestModal.classList.remove('hidden');
+        }
+    }
+
+    function hideScoreModal() {
+        modalOverlay.classList.add('hidden');
+        guestModal.classList.add('hidden');
+        userModal.classList.add('hidden');
+    }
+    
+    // --- Event listeners to close the modal ---
+    allCloseButtons.forEach(button => button.addEventListener('click', hideScoreModal));
+    modalOverlay.addEventListener('click', hideScoreModal);
+
+    // Stop clicks inside the modal from closing it (event propagation)
+    guestModal.addEventListener('click', (e) => e.stopPropagation());
+    userModal.addEventListener('click', (e) => e.stopPropagation());
+
+
+    // --- Game page setup logic ---
     const urlParams = new URLSearchParams(window.location.search);
-    const gameName = urlParams.get('game'); // This will be 'pong', 'snake', etc.
+    const gameName = urlParams.get('game');
 
     if (gameName) {
-        // 2. Update the page content
-        // Capitalize the first letter for a nice title
         const formattedGameName = gameName.charAt(0).toUpperCase() + gameName.slice(1);
-        
         gameTitleElement.textContent = formattedGameName;
         document.title = `ArcadeArchive - ${formattedGameName}`;
 
-        // 3. Set up the "Play" button logic
         const playButton = document.getElementById('play-button');
-        const gameMessage = document.getElementById('game-message');
-
+        
         playButton.addEventListener('click', () => {
-            gameMessage.classList.remove('hidden');
+            console.log("Simulating game play for 2 seconds...");
             playButton.classList.add('hidden');
 
-            // LATER: Instead of a dummy message, this is where we will
-            // actually load and start the game script for `gameName`.
-            
             setTimeout(() => {
-                gameMessage.classList.add('hidden');
+                const dummyScore = Math.floor(Math.random() * 10000);
+                console.log("Simulated game over. Score:", dummyScore);
+                showScoreModal(dummyScore);
                 playButton.classList.remove('hidden');
             }, 2000);
         });
 
     } else {
-        // Handle case where someone lands on game.html without a game parameter
         gameTitleElement.textContent = 'Unknown Game';
     }
+}
+
+// --- Auth Form Toggle Logic ---
+
+const loginContainer = document.getElementById('login-form-container');
+const registerContainer = document.getElementById('register-form-container');
+const showRegisterLink = document.getElementById('show-register');
+const showLoginLink = document.getElementById('show-login');
+
+// Check if these elements exist before adding listeners
+if (loginContainer && registerContainer && showRegisterLink && showLoginLink) {
+    showRegisterLink.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevents the link from jumping to the top of the page
+        loginContainer.classList.add('hidden');
+        registerContainer.classList.remove('hidden');
+    });
+
+    showLoginLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        registerContainer.classList.add('hidden');
+        loginContainer.classList.remove('hidden');
+    });
 }

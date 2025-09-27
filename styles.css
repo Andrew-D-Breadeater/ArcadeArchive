@@ -237,3 +237,153 @@ footer {
 .hidden {
     display: none !important;
 }
+
+/* --- Auth Page Styles --- */
+.auth-form {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    padding: 2rem;
+    max-width: 400px;
+    margin: 2rem auto;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.5rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    background-color: var(--bg-cream);
+    border: 2px solid var(--border-dark-green);
+    color: var(--text-green);
+    box-sizing: border-box; /* Important for padding and width */
+}
+
+.auth-form button {
+    width: 100%;
+    background-color: var(--text-green);
+    color: var(--bg-cream);
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    border: 2px solid var(--border-dark-green);
+    padding: 0.75rem;
+    cursor: pointer;
+}
+
+.form-toggle {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+/* Style for the login button in the nav */
+.login-button {
+    background-color: var(--text-green);
+    color: var(--bg-cream);
+    padding: 0.25rem 0.75rem;
+    border: 2px solid var(--border-dark-green);
+}
+.login-button:hover {
+    background-color: var(--accent-bright-green);
+    color: var(--bg-cream);
+}
+
+/* --- Score Submission Modal & Overlay Styles --- */
+
+/* The semi-transparent background that covers the page */
+#modal-overlay {
+    position: fixed; /* Lock it to the viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Black with 70% opacity */
+    z-index: 100; /* Ensure it's on top of all other page content */
+}
+
+/* The main style for BOTH the guest and user modal boxes */
+.modal {
+    position: fixed; /* Lock it to the viewport */
+    top: 50%;
+    left: 50%;
+    /* The classic centering trick: move it back by half its own width/height */
+    transform: translate(-50%, -50%); 
+    
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    padding: 2rem;
+    width: 90%; /* Responsive for small screens */
+    max-width: 450px; /* But don't let it get too wide on large screens */
+    z-index: 101; /* Sits on top of the overlay */
+    text-align: center;
+}
+
+/* The 'X' button in the top-right corner */
+.close-cross {
+    position: absolute; /* Position relative to the nearest positioned ancestor (.modal) */
+    top: 5px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2.5rem; /* Make the '×' symbol large */
+    color: var(--text-green);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1; /* Keep it vertically centered */
+}
+
+.close-cross:hover {
+    color: var(--border-dark-green);
+}
+
+/* The header text inside the modal */
+.modal h2 {
+    margin-top: 0;
+}
+
+/* The score display text */
+.modal-score {
+    font-size: 2rem;
+    color: var(--border-dark-green);
+    font-weight: bold;
+}
+
+/* The container for the action buttons */
+.modal-actions {
+    margin: 1.5rem 0 0 0; /* Add space above the buttons */
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 1rem;
+}
+
+/* General style for all buttons inside the modal */
+.modal-button {
+    display: block;
+    text-align: center;
+    background-color: var(--text-green);
+    color: var(--bg-cream);
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    border: 2px solid var(--border-dark-green);
+    padding: 0.75rem;
+    cursor: pointer;
+}
+
+/* Specific style for the secondary "Maybe Later" button */
+.modal-button.secondary {
+    background-color: var(--card-bg);
+    color: var(--text-green);
+}
+
+.modal-button:hover {
+    /* A subtle effect for hover */
+    filter: brightness(1.2);
+}
