@@ -97,6 +97,14 @@ h1 {
     font-size: 1.8rem;
 }
 
+.card-link {
+    /* This removes the default link underline */
+    text-decoration: none; 
+    
+    /* This makes the link's text color the same as the parent's text color */
+    color: inherit; 
+}
+
 /* --- Footer --- */
 footer {
     text-align: center;
