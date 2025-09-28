@@ -20,7 +20,7 @@
                 <li><a href="index.html">Main</a></li>
                 <li><a href="leaderboard.html">Leaderboard</a></li>
                 <li><a href="about.html">About Us</a></li>
-                <li><a href="auth.html" class="login-button">Login</a></li>
+                <li><a href="auth.html" class="btn btn-primary">Login</a></li>
             </ul>
         </nav>
     </header>
@@ -30,10 +30,37 @@
         <h1>Now Playing: <span id="game-title">...</span></h1>
 
         <div class="game-container">
-            <button id="play-button">PLAY</button>
+            <button id="play-button" class="btn btn-primary btn-play">PLAY</button>
             <div id="game-message" class="hidden">
                 <p>No game for you yet!</p>
             </div>
+        </div>
+
+        <!-- In game.html -->
+        <div class="personal-scores-container">
+            <h2>Your Personal Bests</h2>
+            
+            <!-- All controls are now grouped together -->
+            <div class="controls-bar">
+                <div class="sort-controls">
+                    <span>Sort by:</span>
+                    <button id="sort-by-date" class="btn btn-small btn-primary">Last Played</button>
+                    <button id="sort-by-score" class="btn btn-small btn-secondary">Highest Score</button>
+                </div>
+                <div class="pagination-controls">
+                    <button id="toggle-all-scores" class="btn btn-secondary">Show All</button>
+                </div>
+            </div>
+        
+            <table class="scores-table">
+                <thead>
+                    <tr>
+                        <th>Score</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="scores-table-body"></tbody>
+            </table>
         </div>
     </main>
 
@@ -47,8 +74,8 @@
         <p>Your Score: <span class="modal-score">0</span></p>
         <p>Want to save your score to the leaderboard?</p>
         <div class="modal-actions">
-            <a href="auth.html" class="modal-button">Login / Register</a>
-            <button class="modal-button secondary close-button">Maybe Later</button>
+            <a href="auth.html" class="btn btn-primary btn-full-width">Login / Register</a>
+            <button class="btn btn-secondary btn-full-width close-button">Maybe Later</button>
         </div>
     </div>
 
@@ -59,7 +86,7 @@
         <p>Your Score: <span class="modal-score">0</span></p>
         <p>Your score has been submitted!</p>
         <div class="modal-actions">
-            <button class="modal-button close-button">Continue</button>
+            <button class="btn btn-primary btn-full-width close-button">Continue</button>
         </div>
     </div>
 

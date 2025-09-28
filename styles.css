@@ -114,6 +114,79 @@ footer {
     color: var(--text-green);
 }
 
+/* --- Reusable Button Styles (The Definitive Fix) --- */
+.btn {
+    /* --- RESET STYLES --- */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: none;
+    margin: 0;
+    
+    /* --- BASE STRUCTURE & TYPOGRAPHY --- */
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border-dark-green);
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* --- MODIFIERS --- */
+
+/* Primary action button (green) */
+.btn-primary {
+    background-color: var(--text-green);
+    color: var(--bg-cream);
+}
+.btn-primary:hover {
+    background-color: var(--accent-bright-green);
+    color: var(--bg-cream);
+}
+
+/* Secondary action button (cream) */
+.btn-secondary {
+    background-color: var(--card-bg);
+    color: var(--text-green);
+}
+.btn-secondary:hover {
+    filter: brightness(0.95);
+}
+
+/* For smaller buttons like sort controls */
+.btn-small {
+    font-size: 1rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Special class for the big 'PLAY' button */
+.btn-play {
+    font-size: 3rem;
+    padding: 1rem 3rem;
+}
+.btn-play:hover {
+    transform: translateY(-5px);
+    box-shadow: 7px 7px 0px 0px var(--border-dark-green);
+}
+
+/* Makes a button take up the full width of its container */
+.btn-full-width {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Style for when a button is disabled */
+.btn[disabled] {
+    background-color: #ccc; /* A generic gray */
+    color: #666;
+    cursor: not-allowed;
+    border-color: #999;
+}
+
 /* --- Media Query for Responsiveness --- */
 /* This block applies only when the screen width is 600px or less */
 @media (max-width: 600px) {
@@ -154,21 +227,6 @@ footer {
     padding-bottom: 0.7rem;
 }
 
-.tab-button {
-    background-color: var(--card-bg);
-    border: 2px solid var(--border-dark-green);
-    color: var(--text-green);
-    font-family: 'VT323', monospace;
-    font-size: 1.3rem;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-}
-
-.tab-button.active {
-    background-color: var(--text-green);
-    color: var(--bg-cream);
-}
-
 .leaderboard-table.hidden {
     display: none;
 }
@@ -207,22 +265,6 @@ footer {
     justify-content: center;
     align-items: center;
     position: relative; /* Important for positioning the message */
-}
-
-#play-button {
-    background-color: var(--text-green);
-    color: var(--bg-cream);
-    font-family: 'VT323', monospace;
-    font-size: 3rem;
-    border: 2px solid var(--border-dark-green);
-    padding: 1rem 3rem;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-#play-button:hover {
-    transform: translateY(-5px);
-    box-shadow: 7px 7px 0px 0px var(--border-dark-green);
 }
 
 #game-message {
@@ -276,32 +318,9 @@ footer {
     box-sizing: border-box; /* Important for padding and width */
 }
 
-.auth-form button {
-    width: 100%;
-    background-color: var(--text-green);
-    color: var(--bg-cream);
-    font-family: 'VT323', monospace;
-    font-size: 1.5rem;
-    border: 2px solid var(--border-dark-green);
-    padding: 0.75rem;
-    cursor: pointer;
-}
-
 .form-toggle {
     text-align: center;
     margin-top: 1rem;
-}
-
-/* Style for the login button in the nav */
-.login-button {
-    background-color: var(--text-green);
-    color: var(--bg-cream);
-    padding: 0.25rem 0.75rem;
-    border: 2px solid var(--border-dark-green);
-}
-.login-button:hover {
-    background-color: var(--accent-bright-green);
-    color: var(--bg-cream);
 }
 
 /* --- Score Submission Modal & Overlay Styles --- */
@@ -372,26 +391,32 @@ footer {
     gap: 1rem;
 }
 
-/* General style for all buttons inside the modal */
-.modal-button {
-    display: block;
-    text-align: center;
-    background-color: var(--text-green);
-    color: var(--bg-cream);
-    font-family: 'VT323', monospace;
-    font-size: 1.5rem;
+/* --- Personal Scores Table Styles --- */
+.personal-scores-container {
+    margin-top: 3rem;
+    border-top: 2px solid var(--border-dark-green);
+    padding-top: 1rem;
+}
+
+.scores-table {
+    width: 100%;
+    border-collapse: collapse; /* Make borders look clean */
+    margin-top: 1rem;
+}
+
+.scores-table th, .scores-table td {
     border: 2px solid var(--border-dark-green);
     padding: 0.75rem;
-    cursor: pointer;
+    text-align: left;
 }
 
-/* Specific style for the secondary "Maybe Later" button */
-.modal-button.secondary {
+.scores-table th {
     background-color: var(--card-bg);
-    color: var(--text-green);
 }
 
-.modal-button:hover {
-    /* A subtle effect for hover */
-    filter: brightness(1.2);
+/* Pagination controls container */
+.pagination-controls {
+    margin-top: 1rem;
+    display: flex; /* Aligns items in a row */
+    justify-content: flex-start; /* Aligns to the left */
 }
