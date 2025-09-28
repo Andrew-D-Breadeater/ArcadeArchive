@@ -10,8 +10,7 @@
 
 A web-based collection of classic arcade games built with Python, Flask, and vanilla JavaScript. This is an educational project focused on demonstrating a full-stack web application from the ground up.
 
-![Screenshot of ArcadeArchive Game Lobby](placeholder.png)
-*(You will replace placeholder.png with a real screenshot later)*
+![Screenshot of ArcadeArchive Game Lobby](DocImages/frontpageScreenshot.png)
 
 ---
 
