@@ -47,7 +47,7 @@ Currently, you can run the frontend shell to explore the user interface.
 
 1.  **Clone the repo**
     ```sh
-    git clone https://github.com/your_username/ArcadeArchive.git
+    git clone https://github.com/Andrew-D-Breadeater/ArcadeArchive.git
     ```
 2.  **Navigate into the project directory**
     ```sh
