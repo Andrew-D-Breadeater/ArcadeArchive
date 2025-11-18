@@ -1,0 +1,87 @@
+/* === ARCADEARCHIVE - LAYOUT STYLES === */
+/* Structural Layout - Page structure and major container layouts */
+
+/* --- Layout Containers --- */
+header, main, footer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* --- Header & Navigation --- */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline; /* Align to the text baseline */
+    border-bottom: 2px solid var(--border-dark-green);
+    padding: 1.5rem 1rem;
+}
+
+.site-name {
+    font-size: 2.5rem; /* Make the title stand out */
+    color: var(--border-dark-green);
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2rem; 
+}
+
+nav a {
+    font-size: 1.5rem;
+}
+
+/* --- Main Content: Game List --- */
+main {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.game-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* --- Footer --- */
+footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--border-dark-green);
+    color: var(--text-green);
+}
+
+/* --- Media Query for Responsiveness --- */
+/* This block applies only when the screen width is 600px or less */
+@media (max-width: 600px) {
+    
+    header {
+        /* Change from a horizontal row to a vertical column */
+        flex-direction: column; 
+        
+        /* Add some space between the stacked logo and nav */
+        gap: 1rem; 
+    }
+
+    /* Optional but good: center the nav text on mobile */
+    nav {
+        text-align: center;
+    }
+
+    /* Make the font a bit smaller on small screens */
+    .site-name {
+        font-size: 2rem;
+    }
+
+    nav a {
+        font-size: 1.3rem;
+    }
+    .game-list {
+        grid-template-columns: 1fr;
+    }
+}

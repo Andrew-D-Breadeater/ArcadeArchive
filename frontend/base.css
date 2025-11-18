@@ -1,0 +1,44 @@
+/* === ARCADEARCHIVE - BASE STYLES === */
+/* Foundation & Global Styles - Applied across entire application */
+
+/* --- Monochrome Terminal Theme --- */
+:root {
+    --bg-cream: #fdf6e3;         /* A yellowy, off-white background */
+    --text-green: #2e7d32;      /* A classic, readable terminal green */
+    --accent-bright-green: #4caf50; /* A brighter green for highlights/hovers */
+    --border-dark-green: #1b5e20; /* A darker green for borders */
+    --card-bg: #f5efdc;         /* A slightly darker cream for cards */
+}
+
+/* --- Global Base Styles --- */
+body {
+    background-color: var(--bg-cream);
+    color: var(--text-green);
+    font-family: 'VT323', monospace; /* Use our new pixel font */
+    font-size: 20px; /* Pixel fonts are small, so we make it bigger */
+    margin: 0;
+    line-height: 1.6;
+}
+
+a {
+    color: var(--text-green);
+    /* No underline by default, feels cleaner with this font */
+    text-decoration: none; 
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--accent-bright-green);
+}
+
+/* Typography */
+h1 {
+    font-size: 2.2rem;
+}
+
+/* --- Utility Classes --- */
+
+/* A general utility class to hide things */
+.hidden {
+    display: none !important;
+}

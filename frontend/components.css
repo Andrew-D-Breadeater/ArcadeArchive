@@ -1,0 +1,302 @@
+/* === ARCADEARCHIVE - COMPONENT STYLES === */
+/* Reusable UI Components - Buttons, forms, modals, cards, etc. */
+
+/* --- Game Card Component --- */
+.game-card {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    border-radius: 0; /* Sharp corners for a retro feel */
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 7px 7px 0px 0px var(--border-dark-green);
+}
+
+.game-card h2 {
+    margin-top: 0;
+    font-size: 1.8rem;
+}
+
+.card-link {
+    /* This removes the default link underline */
+    text-decoration: none; 
+    
+    /* This makes the link's text color the same as the parent's text color */
+    color: inherit; 
+}
+
+/* --- Button Component System --- */
+/* Base button component with modifiers */
+.btn {
+    /* --- RESET STYLES --- */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: none;
+    margin: 0;
+    
+    /* --- BASE STRUCTURE & TYPOGRAPHY --- */
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border-dark-green);
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* --- MODIFIERS --- */
+
+/* Primary action button (green) */
+.btn-primary {
+    background-color: var(--text-green);
+    color: var(--bg-cream);
+}
+.btn-primary:hover {
+    background-color: var(--accent-bright-green);
+    color: var(--bg-cream);
+}
+
+/* Secondary action button (cream) */
+.btn-secondary {
+    background-color: var(--card-bg);
+    color: var(--text-green);
+}
+.btn-secondary:hover {
+    filter: brightness(0.95);
+}
+
+/* For smaller buttons like sort controls */
+.btn-small {
+    font-size: 1rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Special class for the big 'PLAY' button */
+.btn-play {
+    font-size: 3rem;
+    padding: 1rem 3rem;
+}
+.btn-play:hover {
+    transform: translateY(-5px);
+    box-shadow: 7px 7px 0px 0px var(--border-dark-green);
+}
+
+/* Makes a button take up the full width of its container */
+.btn-full-width {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Style for when a button is disabled */
+.btn[disabled] {
+    background-color: #ccc; /* A generic gray */
+    color: #666;
+    cursor: not-allowed;
+    border-color: #999;
+}
+
+/* --- Leaderboard Components --- */
+.leaderboard-nav {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap; /* Allows buttons to wrap on small screens */
+    border-bottom: 2px solid var(--border-dark-green);
+    padding-bottom: 0.7rem;
+}
+
+.leaderboard-table.hidden {
+    display: none;
+}
+
+.leaderboard-table ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.leaderboard-table li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    margin-bottom: 0.5rem;
+}
+
+.leaderboard-table li .name {
+    font-weight: bold;
+}
+
+.leaderboard-table li .score {
+    font-weight: bold;
+    color: var(--border-dark-green);
+}
+
+/* --- Game Page Components --- */
+.game-container {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    min-height: 400px; /* Give it some size */
+    margin: 2rem auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* Important for positioning the message */
+}
+
+#game-message {
+    /* This creates an overlay on top of the container */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--card-bg);
+    
+    /* Center the text inside */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+}
+
+/* --- Form Components --- */
+.auth-form {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    padding: 2rem;
+    max-width: 400px;
+    margin: 2rem auto;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.5rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    background-color: var(--bg-cream);
+    border: 2px solid var(--border-dark-green);
+    color: var(--text-green);
+    box-sizing: border-box; /* Important for padding and width */
+}
+
+.form-toggle {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+/* --- Modal Component System --- */
+/* The semi-transparent background that covers the page */
+#modal-overlay {
+    position: fixed; /* Lock it to the viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Black with 70% opacity */
+    z-index: 100; /* Ensure it's on top of all other page content */
+}
+
+/* The main style for BOTH the guest and user modal boxes */
+.modal {
+    position: fixed; /* Lock it to the viewport */
+    top: 50%;
+    left: 50%;
+    /* The classic centering trick: move it back by half its own width/height */
+    transform: translate(-50%, -50%); 
+    
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-dark-green);
+    padding: 2rem;
+    width: 90%; /* Responsive for small screens */
+    max-width: 450px; /* But don't let it get too wide on large screens */
+    z-index: 101; /* Sits on top of the overlay */
+    text-align: center;
+}
+
+/* The 'X' button in the top-right corner */
+.close-cross {
+    position: absolute; /* Position relative to the nearest positioned ancestor (.modal) */
+    top: 5px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2.5rem; /* Make the '×' symbol large */
+    color: var(--text-green);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1; /* Keep it vertically centered */
+}
+
+.close-cross:hover {
+    color: var(--border-dark-green);
+}
+
+/* The header text inside the modal */
+.modal h2 {
+    margin-top: 0;
+}
+
+/* The score display text */
+.modal-score {
+    font-size: 2rem;
+    color: var(--border-dark-green);
+    font-weight: bold;
+}
+
+/* The container for the action buttons */
+.modal-actions {
+    margin: 1.5rem 0 0 0; /* Add space above the buttons */
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 1rem;
+}
+
+/* --- Personal Scores Table Components --- */
+.personal-scores-container {
+    margin-top: 3rem;
+    border-top: 2px solid var(--border-dark-green);
+    padding-top: 1rem;
+}
+
+.scores-table {
+    width: 100%;
+    border-collapse: collapse; /* Make borders look clean */
+    margin-top: 1rem;
+}
+
+.scores-table th, .scores-table td {
+    border: 2px solid var(--border-dark-green);
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.scores-table th {
+    background-color: var(--card-bg);
+}
+
+/* Pagination controls container */
+.pagination-controls {
+    margin-top: 1rem;
+    display: flex; /* Aligns items in a row */
+    justify-content: flex-start; /* Aligns to the left */
+}
