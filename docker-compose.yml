@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"  # Map PC's port 5000 to the container's port 5000
+    volumes:
+      # Map local 'src' folder to the container's 'src' folder. This allows live code updates.
+      - ./src:/app/src
+      #Map the database file so it persists even if we destroy the container
+      - ./instance:/app/instance
+    environment:
+      - FLASK_DEBUG=1  # Turns on Flask's hot-reloading
+      - DOCKER_CONTAINER=true  # Custom variable to indicate running in Docker

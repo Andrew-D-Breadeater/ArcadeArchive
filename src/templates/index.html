@@ -7,18 +7,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
 
     <header>
-        <div class="site-name"><a href="index.html">ArcadeArchive</a></div>
+        <div class="site-name"><a href="{{ url_for('index') }}">ArcadeArchive</a></div>
         <nav>
             <ul>
-                <li><a href="index.html">Main</a></li>
-                <li><a href="leaderboard.html">Leaderboard</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="auth.html" class="btn btn-primary">Login</a></li>
+                <li><a href="{{ url_for('index') }}">Main</a></li>
+                <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
+                <li><a href="{{ url_for('auth') }}" class="btn btn-primary">Login</a></li>
             </ul>
         </nav>
     </header>
@@ -31,7 +31,7 @@
         <!-- In index.html -->
         <div class="game-list">
             <!-- Card 1 -->
-            <a href="game.html?game=pong" class="card-link">
+            <a href="{{ url_for('game') }}?game=pong" class="card-link">
                 <div class="game-card">
                     <h2>Pong</h2>
                     <p>A classic paddle game.</p>
@@ -39,7 +39,7 @@
             </a>
         
             <!-- Card 2 -->
-            <a href="game.html?game=snake" class="card-link">
+            <a href="{{ url_for('game') }}?game=snake" class="card-link">
                 <div class="game-card">
                     <h2>Snake</h2>
                     <p>Don't eat your own tail!</p>
@@ -47,7 +47,7 @@
             </a>
         
             <!-- Card 3 -->
-            <a href="game.html?game=tetris" class="card-link">
+            <a href="{{ url_for('game') }}?game=tetris" class="card-link">
                 <div class="game-card">
                     <h2>Tetris</h2>
                     <p>Clear the lines.</p>
@@ -55,7 +55,7 @@
             </a>
             
             <!-- Card 4 -->
-            <a href="game.html?game=sokoban" class="card-link">
+            <a href="{{ url_for('game') }}?game=sokoban" class="card-link">
                 <div class="game-card">
                     <h2>Sokoban</h2>
                     <p>Move the crates.</p>

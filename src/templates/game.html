@@ -9,18 +9,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
 
     <header>
-        <div class="site-name"><a href="index.html">ArcadeArchive</a></div>
+        <div class="site-name"><a href="{{ url_for('index') }}">ArcadeArchive</a></div>
         <nav>
             <ul>
-                <li><a href="index.html">Main</a></li>
-                <li><a href="leaderboard.html">Leaderboard</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="auth.html" class="btn btn-primary">Login</a></li>
+                <li><a href="{{ url_for('index') }}">Main</a></li>
+                <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
+                <li><a href="{{ url_for('auth') }}" class="btn btn-primary">Login</a></li>
             </ul>
         </nav>
     </header>
@@ -74,7 +74,7 @@
         <p>Your Score: <span class="modal-score">0</span></p>
         <p>Want to save your score to the leaderboard?</p>
         <div class="modal-actions">
-            <a href="auth.html" class="btn btn-primary btn-full-width">Login / Register</a>
+            <a href="{{ url_for('auth') }}" class="btn btn-primary btn-full-width">Login / Register</a>
             <button class="btn btn-secondary btn-full-width close-button">Maybe Later</button>
         </div>
     </div>
@@ -94,6 +94,6 @@
         <p>&copy; 2025 ArcadeArchive</p>
     </footer>
     
-    <script src="app.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>

@@ -1,3 +1,8 @@
 localhost+3-key.pem
 localhost+3.pem
-DesignDocuments/Reports/*
+DesignDocuments/Reports
+.venv/
+__pycache__/
+*.pyc
+instance/
+.DS_Store
