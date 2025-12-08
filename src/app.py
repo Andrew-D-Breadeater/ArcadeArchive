@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template
 
 # Initialize the Flask app
 # We explicitly tell it where to find the 'template' and 'static' folders

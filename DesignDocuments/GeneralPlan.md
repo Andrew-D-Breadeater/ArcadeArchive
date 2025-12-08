@@ -38,7 +38,7 @@ graph TD
 
 ### 4. Database Schema
 
-We'll use two tables for scores to separate raw data from clean leaderboard data.
+We use a normalized design with a single "source of truth" table for score logging and a SQL View for the leaderboard. This ensures data consistency and simplifies the write logic (we never have to manually update a leaderboard table).
 
 ```mermaid
 erDiagram
@@ -56,19 +56,22 @@ erDiagram
         DATETIME played_at
     }
 
-    leaderboard {
-        INTEGER user_id PK
-        TEXT game_name PK
+    leaderboard_VIEW {
+        INTEGER user_id
+        TEXT game_name
         INTEGER best_score
         DATETIME achieved_at
     }
 
     users ||--o{ score_history : "logs all"
-    users ||--o{ leaderboard : "stores best"
+    score_history ||--|| leaderboard_VIEW : "dynamically aggregates"
 ```
 
-*   **`score_history`**: The "source of truth." A log of every single game played by a registered user.
-*   **`leaderboard`**: A clean summary table. The composite `PRIMARY KEY` of `(user_id, game_name)` ensures it contains only the single best score for each user in each game. This makes fetching leaderboards extremely fast.
+*   **`score_history`**: The physical table. Logs every single game session played by registered users.
+*   **`leaderboard` (VIEW)**: A virtual table calculated dynamically using `MAX(score)` grouped by user and game. It allows us to query the leaderboard as if it were a table, but without managing duplicate data.
+*   **Optimization (Indexes)**:
+    *   **`idx_user_history`** `(user_id, game_name, score DESC)`: Speeds up the "Personal Bests" table on the game page. Imitates a clustered index to keep user data logically grouped.
+    *   **`idx_game_scores`** `(game_name, score DESC)`: Ensures the Leaderboard View is generated instantly by pre-sorting scores for each game.
 
 ### 5. API Endpoints
 

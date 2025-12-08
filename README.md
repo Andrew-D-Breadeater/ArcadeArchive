@@ -41,23 +41,74 @@ This project was built as a hands-on learning exercise to cover the entire lifec
 
 ## Getting Started
 
-Currently, you can run the frontend shell to explore the user interface.
+You can run the application using either **Docker** (recommended for a zero-setup experience) or a local **Python** environment.
 
-### Running the Frontend Shell
+### Prerequisites
+*   **Git**
+*   **Docker Desktop** (for Option 1)
+*   *OR* **Python 3.11+** (for Option 2)
 
-1.  **Clone the repo**
+### Option 1: Docker (Recommended)
+
+This method requires no local Python installation.
+
+1.  **Clone the repository**
     ```sh
     git clone https://github.com/Andrew-D-Breadeater/ArcadeArchive.git
+    cd ArcadeArchive
     ```
-2.  **Navigate into the project directory**
+
+2.  **Start the server**
     ```sh
-    cd ArcadeArchive/frontend
+    docker compose up -d
     ```
-3.  **Open the main page**
-    Simply open the `index.html` file in your favorite web browser.
 
-> Backend setup instructions will be added here once the backend is developed. A Docker setup may be provided to simplify this process in the future.
+3.  **Initialize the Database** (Only required the first time)
+    ```sh
+    docker compose run --rm web python src/init_db.py
+    ```
 
+4.  **Play!**
+    Open [http://localhost:5000](http://localhost:5000) in your browser.
+
+---
+
+### Option 2: Local Python Setup
+
+1.  **Clone the repository**
+    ```sh
+    git clone https://github.com/Andrew-D-Breadeater/ArcadeArchive.git
+    cd ArcadeArchive
+    ```
+
+2.  **Set up the Virtual Environment**
+    ```sh
+    # Create venv
+    python -m venv .venv
+
+    # Activate venv (Linux/macOS)
+    source .venv/bin/activate
+    
+    # Activate venv (Windows)
+    .venv\Scripts\activate
+    ```
+
+3.  **Install Dependencies**
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+4.  **Initialize the Database**
+    ```sh
+    python src/init_db.py
+    ```
+
+5.  **Run the Server**
+    ```sh
+    python src/app.py
+    ```
+    Open [http://localhost:5000](http://localhost:5000) in your browser.
+    
 ## Future Features
 
 - [ ] **Implement Backend:** Build the Flask server and SQLite database.
