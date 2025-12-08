@@ -6,7 +6,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 > **:warning: WORK IN PROGRESS :warning:**
-> This repository currently contains the **frontend shell only**. The user interface is functional, but it is not yet connected to a backend. All data (scores, leaderboards) is mock data. The project is not yet in a playable state.
+>  This repository currently contains the **interface**. The site is fully functional and connected to backend, but has no games. The project is not yet in a playable state.
 
 A web-based collection of classic arcade games built with Python, Flask, and vanilla JavaScript. This is an educational project focused on demonstrating a full-stack web application from the ground up.
 

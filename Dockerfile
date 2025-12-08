@@ -18,4 +18,4 @@ COPY src ./src
 
 # The command to run the app
 # Note: We point to src/app.py
-CMD ["python", "src/app.py"]
+CMD ["python", "-m", "src.app"]

@@ -1,0 +1,91 @@
+### 1. Login to get a session cookie
+POST http://localhost:5000/api/login
+Content-Type: application/json
+
+{
+    "username": "testuser1",
+    "password": "password123"
+}
+
+### 2. Submit a score (SUCCESS)
+# This request will automatically use the cookie from the login above
+POST http://localhost:5000/api/submit-score
+Content-Type: application/json
+
+{
+    "game_name": "pong",
+    "score": 15000
+}
+
+### Submit another score for the same game
+POST http://localhost:5000/api/submit-score
+Content-Type: application/json
+
+{
+    "game_name": "pong",
+    "score": 12000
+}
+
+### Submit a score for a different game
+POST http://localhost:5000/api/submit-score
+Content-Type: application/json
+
+{
+    "game_name": "snake",
+    "score": 9500
+}
+
+### Submit a score without being logged in (FAILURE - 401 Unauthorized)
+# You'd have to run this in a new, clean REST client window that doesn't have a cookie
+POST http://localhost:5000/api/submit-score
+Content-Type: application/json
+
+{
+    "game_name": "pong",
+    "score": 500
+}
+
+#--- Leaderboard api tests---
+
+### Get the leaderboard for Pong (default limit 10)
+GET http://localhost:5000/api/leaderboard/pong
+
+### Get the leaderboard for Snake
+GET http://localhost:5000/api/leaderboard/snake
+
+### Get the leaderboard for Pong with a custom limit
+GET http://localhost:5000/api/leaderboard/pong?limit=3
+
+### Get the leaderboard for a game with no scores yet
+GET http://localhost:5000/api/leaderboard/tetris
+
+
+#--- personal-scores api tests---
+
+### 1. Login as testuser1
+POST http://localhost:5000/api/login
+Content-Type: application/json
+
+{
+    "username": "testuser1",
+    "password": "password123"
+}
+
+### 2. Get personal scores for Pong
+# Should return the 15000 and 12000 scores we submitted earlier
+GET http://localhost:5000/api/personal-scores/pong
+
+### 3. Get personal scores for Snake
+# Should return the 9500 score
+GET http://localhost:5000/api/personal-scores/snake
+
+### 4. Get personal scores for a game they haven't played
+# Should return an empty list: []
+GET http://localhost:5000/api/personal-scores/tetris
+
+### 5. Get personal scores while logged out (FAILURE - 401 Unauthorized)
+ ### Logout to clear the cookie
+POST http://localhost:5000/api/logout
+
+# Now try to get personal scores while logged out
+GET http://localhost:5000/api/personal-scores/pong
