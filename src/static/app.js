@@ -10,57 +10,120 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// --- FEATURE: Leaderboard Tabs ---
+// --- FEATURE: Leaderboard Tabs (Live Data & Cache) ---
 function initLeaderboardTabs() {
     const leaderboardNav = document.querySelector('.leaderboard-nav');
-    if (!leaderboardNav) return; // Only run on the leaderboard page
+    if (!leaderboardNav) return;
 
+    // --- State and Elements ---
+    const leaderboardCache = {}; // Simple object to cache results
     const tabButtons = leaderboardNav.querySelectorAll('.btn');
-    const leaderboardTables = document.querySelectorAll('.leaderboard-table');
+    
+    // --- The main function to fetch and render a leaderboard ---
+    async function loadLeaderboard(gameName) {
+        const targetTable = document.getElementById(gameName + '-leaderboard');
+        if (!targetTable) return;
 
+        // Hide all other tables
+        document.querySelectorAll('.leaderboard-table').forEach(table => table.classList.add('hidden'));
+
+        // Step 1: Check the cache first
+        if (leaderboardCache[gameName]) {
+            console.log(`Loading '${gameName}' leaderboard from cache.`);
+            renderTable(targetTable, leaderboardCache[gameName]);
+            targetTable.classList.remove('hidden');
+            return; // We're done!
+        }
+
+        // Step 2: If not in cache, fetch from the API
+        console.log(`Fetching '${gameName}' leaderboard from API.`);
+        try {
+            const response = await fetch(`/api/leaderboard/${gameName}`);
+            if (response.ok) {
+                const data = await response.json();
+                // Step 3: Save the data to the cache for next time
+                leaderboardCache[gameName] = data;
+                renderTable(targetTable, data);
+            } else {
+                console.error(`Failed to fetch leaderboard for ${gameName}`);
+                renderTable(targetTable, []); // Render an empty table on error
+            }
+        } catch (error) {
+            console.error(`Network error fetching leaderboard for ${gameName}:`, error);
+            renderTable(targetTable, []);
+        }
+        
+        targetTable.classList.remove('hidden');
+    }
+
+    // --- Renders the actual HTML for a given table ---
+    function renderTable(tableElement, data) {
+        const ol = tableElement.querySelector('ol');
+        ol.innerHTML = ''; // Clear old data
+
+        if (data.length === 0) {
+            ol.innerHTML = '<li>No scores yet!</li>';
+            return;
+        }
+
+        data.forEach(entry => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="name">${entry.username}</span> <span class="score">${entry.best_score}</span>`;
+            ol.appendChild(li);
+        });
+    }
+
+    // --- Event Listeners for the tabs ---
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             const targetGame = button.dataset.game;
 
-            // Deactivate all buttons
-            tabButtons.forEach(btn => {
-                btn.classList.replace('btn-primary', 'btn-secondary');
-            });
-            // Activate the clicked button
+            // Update button styles
+            tabButtons.forEach(btn => btn.classList.replace('btn-primary', 'btn-secondary'));
             button.classList.replace('btn-secondary', 'btn-primary');
             
-            // Hide all tables
-            leaderboardTables.forEach(table => table.classList.add('hidden'));
-
-            // Show the target table
-            const targetTable = document.getElementById(targetGame + '-leaderboard');
-            if (targetTable) {
-                targetTable.classList.remove('hidden');
-            }
+            // Load the data for the clicked tab
+            loadLeaderboard(targetGame);
         });
     });
+
+    // --- Initial Load ---
+    // Automatically load the first tab when the page opens
+    const initialGame = leaderboardNav.querySelector('.btn').dataset.game;
+    if (initialGame) {
+        loadLeaderboard(initialGame);
+    }
 }
 
 
 // --- FEATURE: Game Page (Modals & Dynamic Content) ---
-function initGamePage() {
+async function initGamePage() { // Make the function async
     const gameTitleElement = document.getElementById('game-title');
-    if (!gameTitleElement) return; // Only run on the game page
+    if (!gameTitleElement) return;
 
     // --- State ---
-    let isLoggedIn = false;
+    let loginStatus = { logged_in: false }; // Default to logged out
+    try {
+        // Immediately check the user's login status from the server
+        const statusResponse = await fetch('/api/status');
+        if (statusResponse.ok) {
+            loginStatus = await statusResponse.json();
+        }
+    } catch (error) {
+        console.error("Could not fetch login status:", error);
+    }
 
     // --- Elements ---
     const modalOverlay = document.getElementById('modal-overlay');
     const guestModal = document.getElementById('guest-score-modal');
     const userModal = document.getElementById('user-score-modal');
     const allCloseButtons = document.querySelectorAll('.close-button, .close-cross');
-    const gameMessage = document.getElementById('game-message'); // <<< RESTORED THIS
+    const gameMessage = document.getElementById('game-message');
 
     // --- Functions ---
     function showScoreModal(score) {
         modalOverlay.classList.remove('hidden');
-        if (isLoggedIn) {
+        if (loginStatus.logged_in) {
             userModal.querySelector('.modal-score').textContent = score;
             userModal.classList.remove('hidden');
         } else {
@@ -74,14 +137,14 @@ function initGamePage() {
         guestModal.classList.add('hidden');
         userModal.classList.add('hidden');
     }
-    
+
     // --- Event Listeners ---
     allCloseButtons.forEach(button => button.addEventListener('click', hideScoreModal));
     modalOverlay.addEventListener('click', hideScoreModal);
     guestModal.addEventListener('click', (e) => e.stopPropagation());
     userModal.addEventListener('click', (e) => e.stopPropagation());
 
-    // --- Page Setup ---
+    // --- Page Setup & Score Submission ---
     const urlParams = new URLSearchParams(window.location.search);
     const gameName = urlParams.get('game');
 
@@ -92,21 +155,41 @@ function initGamePage() {
 
         const playButton = document.getElementById('play-button');
         playButton.addEventListener('click', () => {
-            // LATER: This is where the real game will start
-            // For now, show the "No game yet" message, then simulate a game end
-            
             playButton.classList.add('hidden');
-            gameMessage.classList.remove('hidden'); // <<< SHOW THE MESSAGE
+            gameMessage.classList.remove('hidden');
 
-            setTimeout(() => {
-                gameMessage.classList.add('hidden'); // <<< HIDE THE MESSAGE
-                
-                // Now, simulate the game ending and show the score modal
+            setTimeout(async () => { // Make this async to handle score submission
+                gameMessage.classList.add('hidden');
+
                 const dummyScore = Math.floor(Math.random() * 10000);
+
+                // --- NEW: SCORE SUBMISSION LOGIC ---
+                try {
+                    let scoreEndpoint = loginStatus.logged_in ? '/api/submit-score' : '/api/session-score';
+
+                    const scoreResponse = await fetch(scoreEndpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ game_name: gameName, score: dummyScore })
+                    });
+
+                    if (scoreResponse.ok) {
+                        console.log("Score submitted, dispatching refresh event.");
+                        // Dispatch the custom event on success
+                        document.dispatchEvent(new CustomEvent('scoreSubmitted', { detail: { gameName } }));
+                    } else {
+                        // Log an error on failure
+                        console.error("Failed to submit score. Status:", scoreResponse.status);
+                    }
+
+                } catch (error) {
+                    console.error("Network error submitting score:", error);
+                }
+
                 showScoreModal(dummyScore);
                 playButton.classList.remove('hidden');
 
-            }, 2000); // Total simulation time is 2 seconds
+            }, 2000);
         });
     } else {
         gameTitleElement.textContent = 'Unknown Game';
@@ -114,53 +197,69 @@ function initGamePage() {
 }
 
 
-// --- FEATURE: Personal Scores Table (Simplified "Show All" Version) ---
-// --- FEATURE: Personal Scores Table (Corrected "Show All" Version) ---
-function initScoresTable() {
+// --- FEATURE: Personal Scores Table (Live Data & Refresh) ---
+async function initScoresTable() { // Make the function async
     const scoresContainer = document.querySelector('.personal-scores-container');
     if (!scoresContainer) return;
 
-    // --- MOCK DATA ---
-    const mockScores = [
-        { score: 8500, date: '2025-09-26' }, { score: 12000, date: '2025-09-27' },
-        { score: 4200, date: '2025-09-22' }, { score: 15500, date: '2025-09-25' },
-        { score: 9100, date: '2025-09-24' }, { score: 7300, date: '2025-09-23' },
-        { score: 18000, date: '2025-09-28' }, { score: 3500, date: '2025-09-21' },
-    ];
+    // --- State and Configuration ---
+    let loginStatus = { logged_in: false };
+    const initialScoresToShow = 5;
+    let currentSort = 'date';
+    let isShowingAll = false;
+    let allScores = []; // This will hold our data from the API
 
     // --- Elements ---
     const tableBody = document.getElementById('scores-table-body');
     const sortByDateButton = document.getElementById('sort-by-date');
     const sortByScoreButton = document.getElementById('sort-by-score');
     const toggleAllButton = document.getElementById('toggle-all-scores');
-    
-    // --- State and Configuration ---
-    const initialScoresToShow = 5;
-    let currentSort = 'date';
-    let isShowingAll = false;
-    let sortedScores = [];
 
-    // --- Functions ---
+    // --- Get the current game name from the URL ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameName = urlParams.get('game');
+    if (!gameName) return; // Can't fetch scores without a game name
+
+    // --- NEW: Function to fetch and render data ---
+    // This is now the single source of truth for getting data.
+    async function refreshTableData() {
+        try {
+            const scoreEndpoint = loginStatus.logged_in
+                ? `/api/personal-scores/${gameName}`
+                : `/api/guest-personal-scores/${gameName}`;
+
+            const scoresResponse = await fetch(scoreEndpoint);
+            if (scoresResponse.ok) {
+                allScores = await scoresResponse.json();
+                renderScoresTable(); // Re-render the table with new data
+            }
+        } catch (error) {
+            console.error("Failed to refresh personal scores:", error);
+        }
+    }
+
+    // --- renderScoresTable function is now just for displaying data ---
     function renderScoresTable() {
         tableBody.innerHTML = '';
+        // Sort the master list of scores
+        const sortedScores = [...allScores].sort((a, b) => {
+            if (currentSort === 'score') return b.score - a.score;
+            // The played_at field is a string, so we need to parse it
+            return new Date(b.played_at) - new Date(a.played_at);
+        });
+
         const scoresToDisplay = isShowingAll ? sortedScores : sortedScores.slice(0, initialScoresToShow);
 
         scoresToDisplay.forEach(item => {
             const row = document.createElement('tr');
-            row.innerHTML = `<td>${item.score}</td><td>${item.date}</td>`;
+            // Format the date to be more readable
+            const formattedDate = new Date(item.played_at).toLocaleDateString();
+            row.innerHTML = `<td>${item.score}</td><td>${formattedDate}</td>`;
             tableBody.appendChild(row);
         });
 
         toggleAllButton.textContent = isShowingAll ? 'Show Less' : 'Show All';
-        toggleAllButton.disabled = sortedScores.length <= initialScoresToShow;
-    }
-    
-    function sortAndRender() {
-        sortedScores = [...mockScores].sort((a, b) => {
-            if (currentSort === 'score') return b.score - a.score;
-            return new Date(b.date) - new Date(a.date);
-        });
-        renderScoresTable();
+        toggleAllButton.disabled = allScores.length <= initialScoresToShow;
     }
 
     // --- Event Listeners ---
@@ -168,14 +267,14 @@ function initScoresTable() {
         currentSort = 'date';
         sortByDateButton.classList.replace('btn-secondary', 'btn-primary');
         sortByScoreButton.classList.replace('btn-primary', 'btn-secondary');
-        sortAndRender();
+        renderScoresTable(); // Just re-render, no need to re-fetch
     });
 
     sortByScoreButton.addEventListener('click', () => {
         currentSort = 'score';
         sortByScoreButton.classList.replace('btn-secondary', 'btn-primary');
         sortByDateButton.classList.replace('btn-primary', 'btn-secondary');
-        sortAndRender();
+        renderScoresTable();
     });
 
     toggleAllButton.addEventListener('click', () => {
@@ -183,19 +282,42 @@ function initScoresTable() {
         renderScoresTable();
     });
 
+    // NEW: Listen for the custom event from the game page
+    document.addEventListener('scoreSubmitted', (event) => {
+        if (event.detail.gameName === gameName) {
+            console.log("Heard scoreSubmitted event, refreshing table...");
+            refreshTableData();
+        }
+    });
+
     // --- Initial Load ---
-    sortAndRender();
+    // This is the new, cleaner initial load sequence.
+    try {
+        // 1. Get the login status first
+        const statusResponse = await fetch('/api/status');
+        if (statusResponse.ok) {
+            loginStatus = await statusResponse.json();
+        }
+        // 2. Then, call our reusable function to fetch and render the scores.
+        await refreshTableData();
+    } catch (error) {
+        console.error("Initial data load for scores table failed:", error);
+    }
 }
 
-// --- FEATURE: Auth Form Toggle ---
+// --- FEATURE: Auth Form Toggle & Submission ---
 function initAuthForms() {
     const loginContainer = document.getElementById('login-form-container');
     if (!loginContainer) return; // Only run on the auth page
 
+    // --- Get all the elements ---
     const registerContainer = document.getElementById('register-form-container');
     const showRegisterLink = document.getElementById('show-register');
     const showLoginLink = document.getElementById('show-login');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
 
+    // --- Toggle Logic (unchanged) ---
     showRegisterLink.addEventListener('click', (e) => {
         e.preventDefault();
         loginContainer.classList.add('hidden');
@@ -206,5 +328,70 @@ function initAuthForms() {
         e.preventDefault();
         registerContainer.classList.add('hidden');
         loginContainer.classList.remove('hidden');
+    });
+
+    // --- NEW: Login Form Submission Logic ---
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Stop the form from reloading the page
+
+        // Get the form data
+        const formData = new FormData(loginForm);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                // If login is successful, redirect to the home page
+                window.location.href = '/';
+            } else {
+                // If there's an error, show it to the user
+                const errorData = await response.json();
+                alert(`Login failed: ${errorData.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+            alert('Could not connect to the server.');
+        }
+    });
+
+    // --- NEW: Register Form Submission Logic ---
+    registerForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(registerForm);
+        const data = Object.fromEntries(formData.entries());
+
+        // Simple client-side check for password match
+        if (data.password !== data['confirm-password']) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: data.username,
+                    password: data.password // Only send what the API needs
+                })
+            });
+
+            if (response.ok) {
+                // If registration is successful, auto-login worked. Redirect home.
+                window.location.href = '/';
+            } else {
+                const errorData = await response.json();
+                alert(`Registration failed: ${errorData.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+            alert('Could not connect to the server.');
+        }
     });
 }
