@@ -15,6 +15,30 @@ app.config['SECRET_KEY'] = 'dev_super_secret_key_change_in_production'
 
 db.init_app(app) # Initialize the database with the app
 
+# --- Helper Functions ---
+
+def transfer_guest_scores_to_user(user_id):
+    """
+    Checks for scores in the session and saves them to the database for the user.
+    """
+    guest_scores = session.get('guest_scores', [])
+    if not guest_scores:
+        return # Do nothing if there are no guest scores
+
+    database = db.get_db()
+    try:
+        for score_data in guest_scores:
+            database.execute(
+                'INSERT INTO score_history (user_id, game_name, score) VALUES (?, ?, ?)',
+                (user_id, score_data['game_name'], score_data['score'])
+            )
+        database.commit()
+        # Clear the guest scores from the session now that they are saved
+        session.pop('guest_scores', None)
+        print(f"Transferred {len(guest_scores)} guest scores to user_id {user_id}")
+    except sqlite3.Error as e:
+        print(f"Database error during guest score transfer: {e}")
+
 # --- Routes ---
 
 @app.route('/')
@@ -54,29 +78,38 @@ def register():
     # 3. Connect to the database
     database = db.get_db()
     
-    # 4. Check if the username already exists
     try:
-        user = database.execute(
-            'SELECT id FROM users WHERE username = ?', (username,)
-        ).fetchone()
+        # Check if user already exists
+        if database.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone() is not None:
+            return jsonify({'error': f"User {username} is already registered."}), 409
 
-        if user is not None:
-            return jsonify({'error': f"User {username} is already registered."}), 409 # 409 Conflict
-
-        # 5. If username is new, hash the password and insert the new user
+        # Insert new user
         hashed_password = generate_password_hash(password)
-        database.execute(
+        cursor = database.execute(
             'INSERT INTO users (username, password_hash) VALUES (?, ?)',
             (username, hashed_password)
         )
         database.commit()
-
+        
+        # Get the ID of the user we just created
+        new_user_id = cursor.lastrowid
+        
+        # Log the new user in automatically
+        session['user_id'] = new_user_id
+        session['username'] = username
+        
+        # Transfer any guest scores
+        transfer_guest_scores_to_user(new_user_id)
+        
     except sqlite3.Error as e:
-        print(f"Database error: {e}") # Log the actual error on the server
-        return jsonify({'error': 'A database error occurred while saving the score.'}), 500
+        print(f"Database error on register: {e}")
+        return jsonify({'error': 'A database error occurred.'}), 500
 
-    # 6. Return a success message
-    return jsonify({'message': 'User created successfully'}), 201 # 201 Created
+    return jsonify({
+        'message': 'User created and logged in successfully',
+        'user': {'id': new_user_id, 'username': username}
+    }), 201
+
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -90,26 +123,26 @@ def login():
     database = db.get_db()
     
     try:
-        user = database.execute(
-            'SELECT * FROM users WHERE username = ?', (username,)
-        ).fetchone()
+        user = database.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
 
-        # Check if user exists AND if the password is correct
-        if user is None:
-            return jsonify({'error': 'Incorrect username or password'}), 401 # 401 Unauthorized
-        elif not check_password_hash(user['password_hash'], password):
+        if user is None or not check_password_hash(user['password_hash'], password):
             return jsonify({'error': 'Incorrect username or password'}), 401
 
-        # If everything is correct, log them in by setting the session
-        session.clear() # Clear any old session data
+        # Log the user in
         session['user_id'] = user['id']
         session['username'] = user['username']
 
-    except sqlite3.Error as e:
-        print(f"Database error: {e}") # Log the actual error on the server
-        return jsonify({'error': 'A database error occurred while saving the score.'}), 500
+        # Transfer any guest scores
+        transfer_guest_scores_to_user(user['id'])
 
-    return jsonify({'message': 'Logged in successfully'}), 200 # 200 OK
+    except sqlite3.Error as e:
+        print(f"Database error on login: {e}")
+        return jsonify({'error': 'A database error occurred.'}), 500
+
+    return jsonify({
+        'message': 'Logged in successfully',
+        'user': {'id': user['id'], 'username': user['username']}
+    }), 200
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
@@ -132,6 +165,63 @@ def status():
         return jsonify({'logged_in': False}), 200
 
 #--- Game Score Submission and Leaderboard api ---
+
+#---Guest user routes ---
+
+@app.route('/api/session-score', methods=['POST'])
+def add_session_score():
+    """
+    Temporarily saves a score to the session for a guest user.
+    """
+    data = request.get_json()
+    game_name = data.get('game_name')
+    score = data.get('score')
+
+    # Basic validation
+    if not game_name or score is None or not isinstance(score, int) or score < 0:
+        return jsonify({'error': 'Invalid score data provided'}), 400
+
+    # 1. Get the existing guest scores list from the session.
+    #    If it doesn't exist, default to an empty list.
+    guest_scores = session.get('guest_scores', [])
+    
+    # 2. Add the new score
+    guest_scores.append({
+        'game_name': game_name,
+        'score': score
+    })
+
+    # 3. Save the updated list back into the session
+    session['guest_scores'] = guest_scores
+
+    # Let the frontend know how many scores are saved
+    return jsonify({
+        'message': 'Guest score saved to session',
+        'guest_score_count': len(guest_scores)
+    }), 200
+    
+@app.route('/api/guest-personal-scores/<string:game_name>', methods=['GET'])
+def get_guest_personal_scores(game_name):
+    """
+    Retrieves scores from the session for a specific game for a guest user.
+    """
+    guest_scores = session.get('guest_scores', [])
+    
+    # Filter the list to only include scores for the requested game
+    scores_for_game = [
+        score for score in guest_scores 
+        if score['game_name'] == game_name
+    ]
+    
+    # We can add a played_at timestamp here for consistency with the real API
+    # This isn't strictly necessary but makes the frontend logic identical.
+    from datetime import datetime
+    for score in scores_for_game:
+        score['played_at'] = datetime.utcnow().isoformat() + 'Z'
+
+    return jsonify(scores_for_game), 200
+
+#---Autorized user routes ---
 
 @app.route('/api/submit-score', methods=['POST'])
 def submit_score():
