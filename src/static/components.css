@@ -204,70 +204,40 @@
     margin-top: 1rem;
 }
 
-/* --- Modal Component System --- */
-/* The semi-transparent background that covers the page */
-#modal-overlay {
-    position: fixed; /* Lock it to the viewport */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Black with 70% opacity */
-    z-index: 100; /* Ensure it's on top of all other page content */
-}
-
-/* The main style for BOTH the guest and user modal boxes */
-.modal {
-    position: fixed; /* Lock it to the viewport */
-    top: 50%;
-    left: 50%;
-    /* The classic centering trick: move it back by half its own width/height */
-    transform: translate(-50%, -50%); 
-    
+/* ==========================================================================
+   Component: Dialog (Modal)
+   - Uses the native <dialog> element.
+   ========================================================================== */
+dialog {
+    /* Base styling for all dialogs */
     background-color: var(--card-bg);
     border: 2px solid var(--border-dark-green);
     padding: 2rem;
-    width: 90%; /* Responsive for small screens */
-    max-width: 450px; /* But don't let it get too wide on large screens */
-    z-index: 101; /* Sits on top of the overlay */
+    width: 90%;
+    max-width: 450px;
     text-align: center;
 }
 
-/* The 'X' button in the top-right corner */
-.close-cross {
-    position: absolute; /* Position relative to the nearest positioned ancestor (.modal) */
-    top: 5px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 2.5rem; /* Make the '×' symbol large */
-    color: var(--text-green);
-    cursor: pointer;
-    padding: 0;
-    line-height: 1; /* Keep it vertically centered */
+dialog::backdrop {
+    /* Style the semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.7);
 }
 
-.close-cross:hover {
-    color: var(--border-dark-green);
-}
-
-/* The header text inside the modal */
-.modal h2 {
+/* Common styles for elements inside our dialogs */
+dialog h2 {
     margin-top: 0;
 }
 
-/* The score display text */
 .modal-score {
     font-size: 2rem;
     color: var(--border-dark-green);
     font-weight: bold;
 }
 
-/* The container for the action buttons */
 .modal-actions {
-    margin: 1.5rem 0 0 0; /* Add space above the buttons */
+    margin: 1.5rem 0 0 0;
     display: flex;
-    flex-direction: column; /* Stack buttons vertically */
+    flex-direction: column;
     gap: 1rem;
 }
 

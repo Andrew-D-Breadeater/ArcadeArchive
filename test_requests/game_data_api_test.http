@@ -89,3 +89,41 @@ POST http://localhost:5000/api/logout
 
 # Now try to get personal scores while logged out
 GET http://localhost:5000/api/personal-scores/pong
+
+
+#--- Guestuser routes tests ---
+
+### Submit a score as a guest user
+### Add a guest score for Pong
+POST http://localhost:5000/api/session-score
+Content-Type: application/json
+
+{
+    "game_name": "pong",
+    "score": 500
+}
+
+### Add another guest score for Snake
+# REST Client will automatically use the cookie from the first request
+# so the new score will be added to the same session list.
+POST http://localhost:5000/api/session-score
+Content-Type: application/json
+
+{
+    "game_name": "snake",
+    "score": 1200
+}
+
+### Retrieve guest scores
+
+### Get guest scores for Pong
+# Should return the [{ "game_name": "pong", "score": 500, ... }] object
+GET http://localhost:5000/api/guest-personal-scores/pong
+
+### Get guest scores for Snake
+# Should return the [{ "game_name": "snake", "score": 1200, ... }] object
+GET http://localhost:5000/api/guest-personal-scores/snake
+
+### Get guest scores for a game they haven't played
+# Should return an empty list: []
+GET http://localhost:5000/api/guest-personal-scores/tetris

@@ -39,15 +39,48 @@ def transfer_guest_scores_to_user(user_id):
     except sqlite3.Error as e:
         print(f"Database error during guest score transfer: {e}")
 
-# --- Routes ---
+GAMES = [
+    {
+        'id': 'pong',
+        'name': 'Pong',
+        'description': 'A classic paddle game.'
+    },
+    {
+        'id': 'snake',
+        'name': 'Snake',
+        'description': "Don't eat your own tail!"
+    },
+    {
+        'id': 'tetris',
+        'name': 'Tetris',
+        'description': 'Clear the lines.'
+    },
+    {
+        'id': 'sokoban',
+        'name': 'Sokoban',
+        'description': 'Push the boxes to their places.'
+    }
+]
+
+#---ROUTES---
+
+# --- HTML Page Routes ---
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    """Serves the main game lobby."""
+    # Pass the list of games to the template
+    return render_template('index.html', games=GAMES)
 
 @app.route('/game')  # Changed from /game.html
 def game():
-    return render_template('game.html')
+    # Get the game name from the URL parameter
+    game_name = request.args.get('game', 'Unknown')
+    # Capitalize it for a nice title
+    page_title = game_name.capitalize()
+    
+    # Pass the title to the template
+    return render_template('game.html', title=page_title)
 
 @app.route('/leaderboard') # Changed from /leaderboard.html
 def leaderboard():

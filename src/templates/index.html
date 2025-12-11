@@ -1,73 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArcadeArchive - Home</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <header>
-        <div class="site-name"><a href="{{ url_for('index') }}">ArcadeArchive</a></div>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('index') }}">Main</a></li>
-                <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
-                <li><a href="{{ url_for('about') }}">About Us</a></li>
-                <li><a href="{{ url_for('auth') }}" class="btn btn-primary">Login</a></li>
-            </ul>
-        </nav>
-    </header>
+{% block title %}ArcadeArchive - Home{% endblock %}
 
-    <main>
-        <!-- This is where the list of games will go. -->
-        <h1>Game Lobby</h1>
-        <p>Select a game to play!</p>
-             
-        <!-- In index.html -->
-        <div class="game-list">
-            <!-- Card 1 -->
-            <a href="{{ url_for('game') }}?game=pong" class="card-link">
-                <div class="game-card">
-                    <h2>Pong</h2>
-                    <p>A classic paddle game.</p>
-                </div>
-            </a>
-        
-            <!-- Card 2 -->
-            <a href="{{ url_for('game') }}?game=snake" class="card-link">
-                <div class="game-card">
-                    <h2>Snake</h2>
-                    <p>Don't eat your own tail!</p>
-                </div>
-            </a>
-        
-            <!-- Card 3 -->
-            <a href="{{ url_for('game') }}?game=tetris" class="card-link">
-                <div class="game-card">
-                    <h2>Tetris</h2>
-                    <p>Clear the lines.</p>
-                </div>
-            </a>
-            
-            <!-- Card 4 -->
-            <a href="{{ url_for('game') }}?game=sokoban" class="card-link">
-                <div class="game-card">
-                    <h2>Sokoban</h2>
-                    <p>Move the crates.</p>
-                </div>
-            </a>
-        </div>
+{% block content %}
 
-    </main>
+    <h1>Game Lobby</h1>
+    <p>Select a game to play!</p>
 
-    <footer>
-        <p>&copy; 2025 ArcadeArchive</p>
-    </footer>
+    <div class="game-list">
 
-</body>
-</html>
+        {% for game in games %}
+
+        <a href="{{ url_for('game', game=game.id) }}" class="card-link">
+            <div class="game-card">
+                <h2>{{ game.name }}</h2>
+                <p>{{ game.description }}</p>
+            </div>
+        </a>
+
+        {% endfor %}
+
+    </div>
+    
+{% endblock %}

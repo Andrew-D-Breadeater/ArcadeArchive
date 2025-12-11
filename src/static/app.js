@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // We run an "init" function for each feature.
     // Each function checks if it's on the right page before running.
+    initAuthStatus();
     initLeaderboardTabs();
     initGamePage();
     initAuthForms();
@@ -96,15 +97,14 @@ function initLeaderboardTabs() {
 }
 
 
-// --- FEATURE: Game Page (Modals & Dynamic Content) ---
-async function initGamePage() { // Make the function async
+/// --- FEATURE: Game Page (Dialogs & Dynamic Content) ---
+async function initGamePage() {
     const gameTitleElement = document.getElementById('game-title');
     if (!gameTitleElement) return;
 
     // --- State ---
-    let loginStatus = { logged_in: false }; // Default to logged out
+    let loginStatus = { logged_in: false };
     try {
-        // Immediately check the user's login status from the server
         const statusResponse = await fetch('/api/status');
         if (statusResponse.ok) {
             loginStatus = await statusResponse.json();
@@ -114,35 +114,29 @@ async function initGamePage() { // Make the function async
     }
 
     // --- Elements ---
-    const modalOverlay = document.getElementById('modal-overlay');
-    const guestModal = document.getElementById('guest-score-modal');
-    const userModal = document.getElementById('user-score-modal');
-    const allCloseButtons = document.querySelectorAll('.close-button, .close-cross');
+    const guestDialog = document.getElementById('guest-score-dialog');
+    const userDialog = document.getElementById('user-score-dialog');
     const gameMessage = document.getElementById('game-message');
+    const playButton = document.getElementById('play-button');
+
+    console.log("Game page init:", { guestDialog, userDialog });
 
     // --- Functions ---
     function showScoreModal(score) {
-        modalOverlay.classList.remove('hidden');
         if (loginStatus.logged_in) {
-            userModal.querySelector('.modal-score').textContent = score;
-            userModal.classList.remove('hidden');
+            if (userDialog) { // Safety check
+                userDialog.querySelector('.modal-score').textContent = score;
+                console.log("Showing user score submition dialog.");
+                userDialog.showModal();
+            }
         } else {
-            guestModal.querySelector('.modal-score').textContent = score;
-            guestModal.classList.remove('hidden');
+            if (guestDialog) { // Safety check
+                guestDialog.querySelector('.modal-score').textContent = score;
+                console.log("Showing guest score submition dialog.");
+                guestDialog.showModal();
+            }
         }
     }
-
-    function hideScoreModal() {
-        modalOverlay.classList.add('hidden');
-        guestModal.classList.add('hidden');
-        userModal.classList.add('hidden');
-    }
-
-    // --- Event Listeners ---
-    allCloseButtons.forEach(button => button.addEventListener('click', hideScoreModal));
-    modalOverlay.addEventListener('click', hideScoreModal);
-    guestModal.addEventListener('click', (e) => e.stopPropagation());
-    userModal.addEventListener('click', (e) => e.stopPropagation());
 
     // --- Page Setup & Score Submission ---
     const urlParams = new URLSearchParams(window.location.search);
@@ -153,7 +147,6 @@ async function initGamePage() { // Make the function async
         gameTitleElement.textContent = formattedGameName;
         document.title = `ArcadeArchive - ${formattedGameName}`;
 
-        const playButton = document.getElementById('play-button');
         playButton.addEventListener('click', () => {
             playButton.classList.add('hidden');
             gameMessage.classList.remove('hidden');
@@ -163,7 +156,7 @@ async function initGamePage() { // Make the function async
 
                 const dummyScore = Math.floor(Math.random() * 10000);
 
-                // --- NEW: SCORE SUBMISSION LOGIC ---
+                // --- SCORE SUBMISSION LOGIC ---
                 try {
                     let scoreEndpoint = loginStatus.logged_in ? '/api/submit-score' : '/api/session-score';
 
@@ -186,9 +179,10 @@ async function initGamePage() { // Make the function async
                     console.error("Network error submitting score:", error);
                 }
 
+                console.log("About to call showScoreModal with score:", dummyScore);
+
                 showScoreModal(dummyScore);
                 playButton.classList.remove('hidden');
-
             }, 2000);
         });
     } else {
@@ -220,7 +214,7 @@ async function initScoresTable() { // Make the function async
     const gameName = urlParams.get('game');
     if (!gameName) return; // Can't fetch scores without a game name
 
-    // --- NEW: Function to fetch and render data ---
+    // ---  Function to fetch and render data ---
     // This is now the single source of truth for getting data.
     async function refreshTableData() {
         try {
@@ -282,7 +276,7 @@ async function initScoresTable() { // Make the function async
         renderScoresTable();
     });
 
-    // NEW: Listen for the custom event from the game page
+    //  Listen for the custom event from the game page
     document.addEventListener('scoreSubmitted', (event) => {
         if (event.detail.gameName === gameName) {
             console.log("Heard scoreSubmitted event, refreshing table...");
@@ -330,7 +324,7 @@ function initAuthForms() {
         loginContainer.classList.remove('hidden');
     });
 
-    // --- NEW: Login Form Submission Logic ---
+    // ---  Login Form Submission Logic ---
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Stop the form from reloading the page
 
@@ -359,7 +353,7 @@ function initAuthForms() {
         }
     });
 
-    // --- NEW: Register Form Submission Logic ---
+    // ---  Register Form Submission Logic ---
     registerForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
@@ -392,6 +386,61 @@ function initAuthForms() {
         } catch (error) {
             console.error('Network error:', error);
             alert('Could not connect to the server.');
+        }
+    });
+}
+
+// --- FEATURE: Global Authentication Status & Logout ---
+async function initAuthStatus() {
+    // --- Get all the elements ---
+    const loginButton = document.getElementById('login-nav-button');
+    const logoutButton = document.getElementById('logout-nav-button');
+    const logoutDialog = document.getElementById('logout-confirm-dialog');
+    
+    // These elements exist on every page because they are in base.html
+    if (!loginButton || !logoutButton || !logoutDialog) return;
+
+    // --- Check login status on page load ---
+    try {
+        const response = await fetch('/api/status');
+        const data = await response.json();
+
+        if (data.logged_in) {
+            // User is logged in: show Logout button
+            loginButton.classList.add('hidden');
+            logoutButton.classList.remove('hidden');
+        } else {
+            // User is a guest: show Login button
+            logoutButton.classList.add('hidden');
+            loginButton.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error("Failed to fetch auth status:", error);
+        // Default to showing the login button on error
+        logoutButton.classList.add('hidden');
+        loginButton.classList.remove('hidden');
+    }
+
+    // --- Event Listeners for Logout Flow ---
+    logoutButton.addEventListener('click', () => {
+        logoutDialog.showModal(); // Use the dialog's built-in method
+    });
+
+    // Listen for when the dialog is closed (by any means)
+    logoutDialog.addEventListener('close', async () => {
+        // .returnValue is set by the button that closed the dialog
+        if (logoutDialog.returnValue === 'confirm') {
+            try {
+                const response = await fetch('/api/logout', { method: 'POST' });
+                if (response.ok) {
+                    // On successful logout, reload the page to reset everything
+                    window.location.reload();
+                } else {
+                    alert("Logout failed. Please try again.");
+                }
+            } catch (error) {
+                alert("Could not connect to the server to log out.");
+            }
         }
     });
 }

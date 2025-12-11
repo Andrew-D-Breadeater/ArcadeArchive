@@ -109,11 +109,11 @@ This method requires no local Python installation.
     ```
     Open [http://localhost:5000](http://localhost:5000) in your browser.
     
-## Future Features
+## Features (not all implemented yet)
 
-- [ ] **Implement Backend:** Build the Flask server and SQLite database.
+- [x] **Implement Backend:** Build the Flask server and SQLite database.
 - [ ] **Implement Games:** Code the actual games (Pong, Snake, etc.) with Kaboom.js.
-- [ ] **Connect Frontend & Backend:** Replace all mock data with real API calls.
+- [x] **Connect Frontend & Backend:** Replace all mock data with real API calls.
 - [ ] **Add User Profile Pages:** Create pages for users to see their stats.
 
 ## License

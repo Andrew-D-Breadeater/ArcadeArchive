@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- The title will be set by child templates -->
+    <title>{% block title %}ArcadeArchive{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <!-- Link to CSS using url_for for reliability -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <header>
+        <div class="site-name"><a href="{{ url_for('index') }}">ArcadeArchive</a></div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Main</a></li>
+                <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
+                <li><a href="{{ url_for('auth') }}" id="login-nav-button" class="btn btn-primary">Login</a></li>
+                <li><button id="logout-nav-button" class="btn btn-secondary hidden">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- This is the main content placeholder -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ArcadeArchive</p>
+    </footer>
+
+    <!-- All modals will live in the base template for sitewide access -->
+    <dialog id="logout-confirm-dialog">
+        <h2>Logout</h2>
+        <p>Are you sure you want to log out?</p>
+        <form method="dialog" class="modal-actions">
+            <button class="btn btn-secondary" value="cancel">Cancel</button>
+            <button class="btn btn-primary" value="confirm">Yes, Logout</button>
+        </form>
+    </dialog>
+    
+    <!-- We link the JS file at the end -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    
+</body>
+</html>
