@@ -19,7 +19,7 @@ function initLeaderboardTabs() {
     // --- State and Elements ---
     const leaderboardCache = {}; // Simple object to cache results
     const tabButtons = leaderboardNav.querySelectorAll('.btn');
-    
+
     // --- The main function to fetch and render a leaderboard ---
     async function loadLeaderboard(gameName) {
         const targetTable = document.getElementById(gameName + '-leaderboard');
@@ -53,7 +53,7 @@ function initLeaderboardTabs() {
             console.error(`Network error fetching leaderboard for ${gameName}:`, error);
             renderTable(targetTable, []);
         }
-        
+
         targetTable.classList.remove('hidden');
     }
 
@@ -82,7 +82,7 @@ function initLeaderboardTabs() {
             // Update button styles
             tabButtons.forEach(btn => btn.classList.replace('btn-primary', 'btn-secondary'));
             button.classList.replace('btn-secondary', 'btn-primary');
-            
+
             // Load the data for the clicked tab
             loadLeaderboard(targetGame);
         });
@@ -118,6 +118,8 @@ async function initGamePage() {
     const userDialog = document.getElementById('user-score-dialog');
     const gameMessage = document.getElementById('game-message');
     const playButton = document.getElementById('play-button');
+    const fsButton = document.getElementById('fullscreen-button');
+    const gameContainer = document.querySelector('.game-container'); // Tell the Kaboom game where to render    
 
     console.log("Game page init:", { guestDialog, userDialog });
 
@@ -138,53 +140,105 @@ async function initGamePage() {
         }
     }
 
+    window.handleGameOver = async (score) => {
+        console.log("Game Over! Score received:", score);
+
+        const canvas = gameContainer.querySelector('canvas');
+        if (canvas) canvas.remove();
+
+        // 1. Submit the score to the backend
+        try {
+            let scoreEndpoint = loginStatus.logged_in ? '/api/submit-score' : '/api/session-score';
+
+            const scoreResponse = await fetch(scoreEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ game_name: gameName, score: score })
+            });
+
+            if (scoreResponse.ok) {
+                console.log("Score submitted, dispatching refresh event.");
+                // Dispatch the custom event on success
+                document.dispatchEvent(new CustomEvent('scoreSubmitted', { detail: { gameName } }));
+            } else {
+                // Log an error on failure
+                console.error("Failed to submit score. Status:", scoreResponse.status);
+            }
+
+        } catch (error) {
+            console.error("Network error submitting score:", error);
+        }
+
+        // 2. Show the modal
+        showScoreModal(score);
+
+        // 3. Bring back the play button so they can try again
+        // Note: You might need to reload the page or cleanup Kaboom here
+        // simpler for now to just reload or handle replay in-game. 
+        // For this version, we will just show the button.
+        playButton.classList.remove('hidden');
+
+    };
+
+
+
+    function loadGameScript() {
+        // 2. Load the specific game script
+        // We verify the game name to prevent loading malicious files
+        const allowedGames = ['pong', 'snake', 'tetris', 'sokoban', 'testgame'];
+        if (!allowedGames.includes(gameName)) {
+            alert("Game not found!");
+            return;
+        }
+
+        // Remove old canvas if it exists (cleanup from previous run)
+        const oldCanvas = gameContainer.querySelector('canvas');
+        if (oldCanvas) oldCanvas.remove();
+
+        const gameScript = document.createElement('script');
+        gameScript.src = `/static/games/${gameName}.js`;
+        document.body.appendChild(gameScript);
+    }
+
+
     // --- Page Setup & Score Submission ---
     const urlParams = new URLSearchParams(window.location.search);
     const gameName = urlParams.get('game');
+
+    // --- Fullscreen Logic ---
+    fsButton.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            // Enter Fullscreen
+            gameContainer.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            // Exit Fullscreen
+            document.exitFullscreen();
+        }
+    });
 
     if (gameName) {
         const formattedGameName = gameName.charAt(0).toUpperCase() + gameName.slice(1);
         gameTitleElement.textContent = formattedGameName;
         document.title = `ArcadeArchive - ${formattedGameName}`;
 
+        // Play Button Logic (The Loader)
         playButton.addEventListener('click', () => {
             playButton.classList.add('hidden');
-            gameMessage.classList.remove('hidden');
+            fsButton.classList.remove('hidden');
 
-            setTimeout(async () => { // Make this async to handle score submission
-                gameMessage.classList.add('hidden');
-
-                const dummyScore = Math.floor(Math.random() * 10000);
-
-                // --- SCORE SUBMISSION LOGIC ---
-                try {
-                    let scoreEndpoint = loginStatus.logged_in ? '/api/submit-score' : '/api/session-score';
-
-                    const scoreResponse = await fetch(scoreEndpoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ game_name: gameName, score: dummyScore })
-                    });
-
-                    if (scoreResponse.ok) {
-                        console.log("Score submitted, dispatching refresh event.");
-                        // Dispatch the custom event on success
-                        document.dispatchEvent(new CustomEvent('scoreSubmitted', { detail: { gameName } }));
-                    } else {
-                        // Log an error on failure
-                        console.error("Failed to submit score. Status:", scoreResponse.status);
-                    }
-
-                } catch (error) {
-                    console.error("Network error submitting score:", error);
-                }
-
-                console.log("About to call showScoreModal with score:", dummyScore);
-
-                showScoreModal(dummyScore);
-                playButton.classList.remove('hidden');
-            }, 2000);
+            // 1. Check if Kaboom is already loaded
+            if (!window.kaboom) {
+                const libScript = document.createElement('script');
+                libScript.src = '/static/lib/kaboom.js';
+                libScript.onload = loadGameScript; // Load game after lib is ready
+                document.body.appendChild(libScript);
+            } else {
+                loadGameScript();
+            }
         });
+
     } else {
         gameTitleElement.textContent = 'Unknown Game';
     }
@@ -396,7 +450,7 @@ async function initAuthStatus() {
     const loginButton = document.getElementById('login-nav-button');
     const logoutButton = document.getElementById('logout-nav-button');
     const logoutDialog = document.getElementById('logout-confirm-dialog');
-    
+
     // These elements exist on every page because they are in base.html
     if (!loginButton || !logoutButton || !logoutDialog) return;
 

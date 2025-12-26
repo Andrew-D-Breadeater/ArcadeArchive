@@ -5,7 +5,8 @@
 .game-card {
     background-color: var(--card-bg);
     border: 2px solid var(--border-dark-green);
-    border-radius: 0; /* Sharp corners for a retro feel */
+    border-radius: 0;
+    /* Sharp corners for a retro feel */
     padding: 1rem 1.5rem;
     cursor: pointer;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s;
@@ -23,10 +24,10 @@
 
 .card-link {
     /* This removes the default link underline */
-    text-decoration: none; 
-    
+    text-decoration: none;
+
     /* This makes the link's text color the same as the parent's text color */
-    color: inherit; 
+    color: inherit;
 }
 
 /* --- Button Component System --- */
@@ -39,7 +40,7 @@
     background: transparent;
     border: none;
     margin: 0;
-    
+
     /* --- BASE STRUCTURE & TYPOGRAPHY --- */
     font-family: 'VT323', monospace;
     font-size: 1.3rem;
@@ -59,6 +60,7 @@
     background-color: var(--text-green);
     color: var(--bg-cream);
 }
+
 .btn-primary:hover {
     background-color: var(--accent-bright-green);
     color: var(--bg-cream);
@@ -69,6 +71,7 @@
     background-color: var(--card-bg);
     color: var(--text-green);
 }
+
 .btn-secondary:hover {
     filter: brightness(0.95);
 }
@@ -84,6 +87,7 @@
     font-size: 3rem;
     padding: 1rem 3rem;
 }
+
 .btn-play:hover {
     transform: translateY(-5px);
     box-shadow: 7px 7px 0px 0px var(--border-dark-green);
@@ -97,18 +101,42 @@
 
 /* Style for when a button is disabled */
 .btn[disabled] {
-    background-color: #ccc; /* A generic gray */
+    background-color: #ccc;
+    /* A generic gray */
     color: #666;
     cursor: not-allowed;
     border-color: #999;
 }
+
+/* --- Fullscreen Button --- */
+.btn-fs {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    color: var(--text-white); /* Or var(--text-green) */
+    border: 1px solid var(--border-dark-green);
+    font-size: 1.5rem;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    z-index: 20; /* Ensure it is above the canvas */
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.btn-fs:hover {
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--accent-bright-green);
+}
+
 
 /* --- Leaderboard Components --- */
 .leaderboard-nav {
     display: flex;
     gap: 1rem;
     margin: 2rem 0;
-    flex-wrap: wrap; /* Allows buttons to wrap on small screens */
+    flex-wrap: wrap;
+    /* Allows buttons to wrap on small screens */
     border-bottom: 2px solid var(--border-dark-green);
     padding-bottom: 0.7rem;
 }
@@ -145,13 +173,43 @@
 .game-container {
     background-color: var(--card-bg);
     border: 2px solid var(--border-dark-green);
-    min-height: 400px; /* Give it some size */
+    min-height: 400px;
+    /* Give it some size */
     margin: 2rem auto;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative; /* Important for positioning the message */
+    position: relative;
+    /* Important for positioning the message */
 }
+
+.game-container:fullscreen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black; /* Letterboxing bars will be black */
+}
+
+/* --- Game Canvas Scaling --- */
+.game-container canvas {
+    width: 100% !important;
+    height: auto !important;
+    display: block;
+}
+
+.game-container:fullscreen canvas {
+    /* Reset specific dimensions */
+    width: 100% !important;
+    height: auto !important;
+    
+    /* The Logic: Grow as big as possible, but NEVER exceed screen width OR height */
+    max-width: 100%;
+    max-height: 100%;
+    
+    /* Ensure aspect ratio is preserved */
+    object-fit: contain; 
+}
+
 
 #game-message {
     /* This creates an overlay on top of the container */
@@ -161,7 +219,7 @@
     width: 100%;
     height: 100%;
     background-color: var(--card-bg);
-    
+
     /* Center the text inside */
     display: flex;
     justify-content: center;
@@ -196,7 +254,8 @@
     background-color: var(--bg-cream);
     border: 2px solid var(--border-dark-green);
     color: var(--text-green);
-    box-sizing: border-box; /* Important for padding and width */
+    box-sizing: border-box;
+    /* Important for padding and width */
 }
 
 .form-toggle {
@@ -250,11 +309,13 @@ dialog h2 {
 
 .scores-table {
     width: 100%;
-    border-collapse: collapse; /* Make borders look clean */
+    border-collapse: collapse;
+    /* Make borders look clean */
     margin-top: 1rem;
 }
 
-.scores-table th, .scores-table td {
+.scores-table th,
+.scores-table td {
     border: 2px solid var(--border-dark-green);
     padding: 0.75rem;
     text-align: left;
@@ -267,6 +328,8 @@ dialog h2 {
 /* Pagination controls container */
 .pagination-controls {
     margin-top: 1rem;
-    display: flex; /* Aligns items in a row */
-    justify-content: flex-start; /* Aligns to the left */
+    display: flex;
+    /* Aligns items in a row */
+    justify-content: flex-start;
+    /* Aligns to the left */
 }

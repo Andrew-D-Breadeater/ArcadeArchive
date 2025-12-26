@@ -105,7 +105,7 @@ This method requires no local Python installation.
 
 5.  **Run the Server**
     ```sh
-    python src/app.py
+    python -m src.app
     ```
     Open [http://localhost:5000](http://localhost:5000) in your browser.
     

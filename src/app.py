@@ -59,6 +59,11 @@ GAMES = [
         'id': 'sokoban',
         'name': 'Sokoban',
         'description': 'Push the boxes to their places.'
+    },
+    {
+        'id': 'testgame',
+        'name': 'Testgame',
+        'description': 'Only for testing purposes.'
     }
 ]
 
