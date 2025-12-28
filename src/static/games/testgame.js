@@ -1,85 +1,49 @@
-// 1. Initialize
-kaboom({
-    background: [29, 43, 83], // Pitch black
-    width: 800,
-    height: 400,
-    scale: 1,
-    root: document.querySelector(".game-container"),
-    debug: true, // Show the green debug text
-});
+// Check if Kaplay is already running to prevent double-initialization
+if (typeof add === 'undefined') {
+    kaplay({
+        width: 1600,
+        height: 800,
+        scale: 1,
+        background: [50, 50, 50], // Grey background to see canvas edges
+        root: document.querySelector(".game-container"),
+        debug: true,
+        pixelDensity: 1,
+        letterbox: false, // Keeps aspect ratio correct in fullscreen
+    });
+}
 
-// 2. Simple Scene
 scene("main", () => {
-    
-    // Paddles
+
+    // 1. Red Center Block
     add([
-        rect(20, 80),
-        pos(20, height() / 2),
-        anchor("center"),
-        color(255, 255, 255),
-        area(),
-        "paddle",
-    ]);
-    debug.log("Left paddle added");
-
-    // Player Paddle (Mouse control for simplicity on first test)
-    const player = add([
-        rect(20, 80),
-        pos(width() - 20, height() / 2),
-        anchor("center"),
-        color(255, 255, 255),
-        area(),
-        "paddle",
-    ]);
-    debug.log("Right paddle added");
-
-    // Ball
-    const ball = add([
-        rect(15, 15),
+        rect(100, 100),
         pos(center()),
-        color(255, 255, 255),
-        area(),
-        { vel: vec2(400, 400) }, // Custom component for movement
-        "ball",
+        anchor("center"),
+        color(255, 0, 0),
     ]);
-    debug.log("Ball added");
 
-    // Simple Score
-    let score = 0;
-    const scoreLabel = add([
-        text(score),
+    // 2. Green Top-Left Block (Should touch top-left corner)
+    add([
+        rect(50, 50),
+        pos(0, 0),
+        color(0, 255, 0),
+    ]);
+
+    // 3. Blue Bottom-Right Block (Should touch bottom-right corner)
+    // If you can't see this, the canvas is being cut off!
+    add([
+        rect(50, 50),
+        pos(width() - 50, height() - 50),
+        color(0, 0, 255),
+    ]);
+
+    // 4. Resolution Text
+    add([
+        text(`Canvas: ${width()} x ${height()}`),
         pos(center().x, 50),
         anchor("center"),
+        color(255, 255, 255)
     ]);
-
-    // Update Loop
-    onUpdate(() => {
-        player.pos.y = mousePos().y;
-
-        // Simple ball movement
-        ball.move(ball.vel.x, ball.vel.y);
-
-        // Bounce off top/bottom
-        if (ball.pos.y < 0 || ball.pos.y > height()) {
-            ball.vel.y = -ball.vel.y;
-        }
-
-        // Loose condition (Ball goes past player)
-        if (ball.pos.x > width()) {
-            // --- THE BRIDGE ---
-            // Call the global function we defined in app.js
-            window.handleGameOver(score);
-            // Shake screen
-            shake();
-            // Go to a pause state or restart
-            go("gameover");
-        }
-
-        // Bounce off left wall (AI side)
-        if (ball.pos.x < 0) {
-            ball.vel.x = -ball.vel.x;
-        }
-    });
 });
 
 go("main");

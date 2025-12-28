@@ -1,22 +1,26 @@
 // src/static/games/pong.js
 
-kaboom({
-    background: [29, 43, 83],
-    width: 800,
-    height: 400,
-    scale: 1,
-    root: document.querySelector(".game-container"),
-    debug: true,
-});
+// 1. Initialize Kaplay
+if (typeof add === 'undefined') {
+    kaplay({
+        background: [29, 43, 83],
+        width: 800,
+        height: 400,
+        scale: 2,
+        root: document.querySelector(".game-container"),
+        debug: true,
+        letterbox: false,
+    });
+}
 
 scene("main", () => {
 
     // --- SETTINGS ---
-    // Physics constants (Applied to both paddles for symmetry)
-    const ACCEL = 30;         // Acceleration factor (Spring tension)
-    const FRICTION = 0.65;    // Dampening factor (0.0 - 1.0)
-    const AI_ERROR_RANGE = 50; // Higher number = AI makes bigger mistakes (Easier for player)
-    const AI_FOCUS_SPEED = 3; // Controls how fast the AI moves its "mental target" (Lower = Slower reaction)
+    const ACCEL = 30;         
+    const FRICTION = 0.65;    
+    const AI_ERROR_RANGE = 50; 
+    const AI_FOCUS_SPEED = 2.6; 
+    const WIN_SCORE = 3;      // First to 3 wins
 
     // --- OBJECTS ---
 
@@ -29,7 +33,7 @@ scene("main", () => {
         area(),
         "paddle",
         "player2",
-        { currentVelY: 0 } // Custom property for physics
+        { currentVelY: 0 }
     ]);
 
     // Right Paddle (Player 1)
@@ -41,7 +45,7 @@ scene("main", () => {
         area(),
         "paddle",
         "player1",
-        { currentVelY: 0 } // Custom property for physics
+        { currentVelY: 0 } 
     ]);
 
     // Ball
@@ -51,14 +55,17 @@ scene("main", () => {
         anchor("center"),
         color(255, 255, 255),
         area(),
-        { vel: vec2(400, 400) }, // Using vec2 for velocity
+        { vel: vec2(400, 400) }, 
         "ball",
     ]);
 
-    // Score
-    let score = 0;
+    // Score Variables
+    let scoreP1 = 0;
+    let scoreP2 = 0;
+
+    // Score UI (Displays "0 - 0")
     const scoreLabel = add([
-        text("0"),
+        text("0 - 0"),
         pos(center().x, 50),
         anchor("center"),
         color(255, 255, 255),
@@ -66,111 +73,110 @@ scene("main", () => {
 
     // --- LOGIC ---
 
-    let aiMentalTargetY = height() / 2; // Persistent variable to track the AI's mental focus point
+    let aiMentalTargetY = height() / 2; 
 
     onUpdate(() => {
         // --- 1. PLAYER 1 MOVEMENT (Right Side) ---
-        // Target: Mouse Y position
         const p1TargetY = mousePos().y;
-
-        // Calculate distance to target
         const p1Diff = p1TargetY - player1.pos.y;
 
-        // Apply Spring Physics
         player1.currentVelY += p1Diff * ACCEL * dt();
         player1.currentVelY *= FRICTION;
         player1.pos.y += player1.currentVelY;
 
-        // Clamp to screen
-        if (player1.pos.y < 50) {
-            player1.pos.y = 50;
-            player1.currentVelY = 0; // Kill velocity on impact
-        }
-        if (player1.pos.y > height() - 50) {
-            player1.pos.y = height() - 50;
-            player1.currentVelY = 0;
-        }
+        if (player1.pos.y < 50) { player1.pos.y = 50; player1.currentVelY = 0; }
+        if (player1.pos.y > height() - 50) { player1.pos.y = height() - 50; player1.currentVelY = 0; }
 
         // --- 2. PLAYER 2 MOVEMENT (Left Side / AI) ---
-        // Target: Ball Y position (AI tracking)
         let realTargetY = height() / 2;
 
         if (ball.vel.x < 0) {
             const distanceX = ball.pos.x - 30;
             const timeToImpact = distanceX / Math.abs(ball.vel.x);
             const predictedY = ball.pos.y + (ball.vel.y * timeToImpact);
-
-            // Note: We apply error to the *Destination*, not the lerp
             realTargetY = predictedY + rand(-AI_ERROR_RANGE, AI_ERROR_RANGE);
         }
 
-        // 2. Smoothly move the "Mental Target" towards the "Real Target"
-        // lerp(current, target, speed) creates a smooth transition
         aiMentalTargetY = lerp(aiMentalTargetY, realTargetY, dt() * AI_FOCUS_SPEED);
-
-        // 3. Physics uses the Mental Target (No huge jumps in distance = No teleporting)
         const p2Diff = aiMentalTargetY - player2.pos.y;
 
-
-        // Apply Spring Physics
         player2.currentVelY += p2Diff * ACCEL * dt();
         player2.currentVelY *= FRICTION;
         player2.pos.y += player2.currentVelY;
 
-        // Clamp to screen
-        if (player2.pos.y < 50) {
-            player2.pos.y = 50;
-            player2.currentVelY = 0;
-        }
-        if (player2.pos.y > height() - 50) {
-            player2.pos.y = height() - 50;
-            player2.currentVelY = 0;
-        }
+        if (player2.pos.y < 50) { player2.pos.y = 50; player2.currentVelY = 0; }
+        if (player2.pos.y > height() - 50) { player2.pos.y = height() - 50; player2.currentVelY = 0; }
 
         // --- 3. BALL MOVEMENT ---
         ball.move(ball.vel.x, ball.vel.y);
 
         // Bounce off Top/Bottom
-        if (ball.pos.y < 0 && ball.vel.y < 0) {
-            ball.vel.y = -ball.vel.y;
-        }
-        if (ball.pos.y > height() && ball.vel.y > 0) {
-            ball.vel.y = -ball.vel.y;
-        }
+        if (ball.pos.y < 0 && ball.vel.y < 0) ball.vel.y = -ball.vel.y;
+        if (ball.pos.y > height() && ball.vel.y > 0) ball.vel.y = -ball.vel.y;
 
-        // Bounce off Left Wall (Safety net if AI misses)
-        if (ball.pos.x < 0 && ball.vel.x < 0) {
-            ball.vel.x = -ball.vel.x;
-        }
-
-        // Game Over (Ball goes past Player 1)
+        // --- SCORING LOGIC ---
+        
+        // Ball goes past Player 1 (Right Wall) -> AI Scores
         if (ball.pos.x > width()) {
-            window.handleGameOver(score);
-            go("gameover");
+            scoreP2++;
+            updateGame("AI Scores!");
+        }
+
+        // Ball goes past Player 2 (Left Wall) -> Player Scores
+        if (ball.pos.x < 0) {
+            scoreP1++;
+            updateGame("You Score!");
         }
     });
+
+    // Helper to handle scoring, resetting, and checking win condition
+    function updateGame(message) {
+        shake(1);
+        scoreLabel.text = `${scoreP2} - ${scoreP1}`;
+        
+        // Check for Match Win
+        if (scoreP1 >= WIN_SCORE || scoreP2 >= WIN_SCORE) {
+            // Submit the player's score (e.g., 3 if they won, 1 if they lost)
+            window.handleGameOver(scoreP1); 
+            go("gameover", { winner: scoreP1 >= WIN_SCORE ? "YOU WIN!" : "AI WINS!" });
+        } else {
+            // Reset Ball for next point
+            resetBall();
+        }
+    }
+
+    function resetBall() {
+        ball.pos = center();
+        // Launch ball towards the person who just lost the point? 
+        // Or random X direction, random Y angle
+        ball.vel.x = choose([-400, 400]);
+        ball.vel.y = rand(-400, 400);
+    }
 
     // --- COLLISIONS ---
     ball.onCollide("paddle", () => {
-        // Reverse X direction
         ball.vel.x = -ball.vel.x;
-
         // Speed up slightly on every hit
         ball.vel.x *= 1.05;
         ball.vel.y *= 1.05;
-
-        score += 100;
-        scoreLabel.text = score;
-        shake(1);
+        shake(0.25);
+        // Note: No score increase here anymore, only on wall hit
     });
 });
 
-scene("gameover", () => {
+scene("gameover", (data) => {
     add([
-        text("Game Over"),
-        pos(center()),
+        text(data.winner),
+        pos(center().x, center().y - 100),
         anchor("center"),
-        color(255, 0, 0),
+        color(255, 255, 255),
+    ]);
+    add([
+        text("Press Play to Restart"),
+        pos(center().x, center().y + 100),
+        anchor("center"),
+        scale(0.5),
+        color(255, 255, 255),
     ]);
 });
 

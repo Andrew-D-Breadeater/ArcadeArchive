@@ -97,13 +97,15 @@ function initLeaderboardTabs() {
 }
 
 
-/// --- FEATURE: Game Page (Dialogs & Dynamic Content) ---
+// --- FEATURE: Game Page (Dialogs, Dynamic Content & Fullscreen) ---
 async function initGamePage() {
     const gameTitleElement = document.getElementById('game-title');
     if (!gameTitleElement) return;
 
     // --- State ---
     let loginStatus = { logged_in: false };
+    let isGameRunning = false;
+
     try {
         const statusResponse = await fetch('/api/status');
         if (statusResponse.ok) {
@@ -118,126 +120,120 @@ async function initGamePage() {
     const userDialog = document.getElementById('user-score-dialog');
     const gameMessage = document.getElementById('game-message');
     const playButton = document.getElementById('play-button');
-    const fsButton = document.getElementById('fullscreen-button');
-    const gameContainer = document.querySelector('.game-container'); // Tell the Kaboom game where to render    
-
-    console.log("Game page init:", { guestDialog, userDialog });
+    const fsButton = document.getElementById('fullscreen-button'); // <<< RESTORED
+    const gameContainer = document.querySelector('.game-container');
 
     // --- Functions ---
     function showScoreModal(score) {
         if (loginStatus.logged_in) {
-            if (userDialog) { // Safety check
+            if (userDialog) {
                 userDialog.querySelector('.modal-score').textContent = score;
-                console.log("Showing user score submition dialog.");
                 userDialog.showModal();
             }
         } else {
-            if (guestDialog) { // Safety check
+            if (guestDialog) {
                 guestDialog.querySelector('.modal-score').textContent = score;
-                console.log("Showing guest score submition dialog.");
                 guestDialog.showModal();
             }
         }
     }
 
+    // --- Fullscreen Logic (RESTORED) ---
+    if (fsButton && gameContainer) {
+        fsButton.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                gameContainer.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+    }
+
+    // --- THE BRIDGE: Function for the game to call when finished ---
     window.handleGameOver = async (score) => {
         console.log("Game Over! Score received:", score);
 
-        const canvas = gameContainer.querySelector('canvas');
-        if (canvas) canvas.remove();
-
         // 1. Submit the score to the backend
         try {
+            const gameName = new URLSearchParams(window.location.search).get('game');
             let scoreEndpoint = loginStatus.logged_in ? '/api/submit-score' : '/api/session-score';
 
-            const scoreResponse = await fetch(scoreEndpoint, {
+            const response = await fetch(scoreEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ game_name: gameName, score: score })
             });
 
-            if (scoreResponse.ok) {
-                console.log("Score submitted, dispatching refresh event.");
-                // Dispatch the custom event on success
+            if (response.ok) {
                 document.dispatchEvent(new CustomEvent('scoreSubmitted', { detail: { gameName } }));
-            } else {
-                // Log an error on failure
-                console.error("Failed to submit score. Status:", scoreResponse.status);
             }
-
         } catch (error) {
-            console.error("Network error submitting score:", error);
+            console.error("Score submission failed:", error);
         }
 
         // 2. Show the modal
         showScoreModal(score);
 
-        // 3. Bring back the play button so they can try again
-        // Note: You might need to reload the page or cleanup Kaboom here
-        // simpler for now to just reload or handle replay in-game. 
-        // For this version, we will just show the button.
+        // 3. Bring back the play button
         playButton.classList.remove('hidden');
 
+        // 4. Ensure fullscreen button stays visible
+        if (fsButton) fsButton.classList.remove('hidden');
     };
-
-
-
-    function loadGameScript() {
-        // 2. Load the specific game script
-        // We verify the game name to prevent loading malicious files
-        const allowedGames = ['pong', 'snake', 'tetris', 'sokoban', 'testgame'];
-        if (!allowedGames.includes(gameName)) {
-            alert("Game not found!");
-            return;
-        }
-
-        // Remove old canvas if it exists (cleanup from previous run)
-        const oldCanvas = gameContainer.querySelector('canvas');
-        if (oldCanvas) oldCanvas.remove();
-
-        const gameScript = document.createElement('script');
-        gameScript.src = `/static/games/${gameName}.js`;
-        document.body.appendChild(gameScript);
-    }
-
 
     // --- Page Setup & Score Submission ---
     const urlParams = new URLSearchParams(window.location.search);
     const gameName = urlParams.get('game');
-
-    // --- Fullscreen Logic ---
-    fsButton.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            // Enter Fullscreen
-            gameContainer.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-            });
-        } else {
-            // Exit Fullscreen
-            document.exitFullscreen();
-        }
-    });
 
     if (gameName) {
         const formattedGameName = gameName.charAt(0).toUpperCase() + gameName.slice(1);
         gameTitleElement.textContent = formattedGameName;
         document.title = `ArcadeArchive - ${formattedGameName}`;
 
-        // Play Button Logic (The Loader)
         playButton.addEventListener('click', () => {
             playButton.classList.add('hidden');
-            fsButton.classList.remove('hidden');
+            if (fsButton) fsButton.classList.remove('hidden'); // <<< Show FS button on play
 
-            // 1. Check if Kaboom is already loaded
-            if (!window.kaboom) {
+            // IF the game is already running, just restart the scene!
+            if (isGameRunning && typeof go === 'function') {
+                go("main");
+                return;
+            }
+
+            // IF this is the first time, load the scripts
+            gameMessage.classList.remove('hidden');
+
+            // 1. Check if Kaplay is already loaded
+            if (!window.kaplay) {
                 const libScript = document.createElement('script');
-                libScript.src = '/static/lib/kaboom.js';
-                libScript.onload = loadGameScript; // Load game after lib is ready
+                libScript.src = '/static/lib/kaplay.js';
+                libScript.onload = loadGameScript;
                 document.body.appendChild(libScript);
             } else {
                 loadGameScript();
             }
         });
+
+        function loadGameScript() {
+            const allowedGames = ['pong', 'snake', 'tetris', 'sokoban','testgame'];
+            if (!allowedGames.includes(gameName)) {
+                alert("Game not found!");
+                return;
+            }
+
+            const gameScript = document.createElement('script');
+            // We use a timestamp to prevent caching old code changes
+            gameScript.src = `/static/games/${gameName}.js?t=${new Date().getTime()}`;
+
+            gameScript.onload = () => {
+                gameMessage.classList.add('hidden');
+                isGameRunning = true;
+            };
+
+            document.body.appendChild(gameScript);
+        }
 
     } else {
         gameTitleElement.textContent = 'Unknown Game';
