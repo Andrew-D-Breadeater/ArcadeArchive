@@ -1,14 +1,14 @@
 // Check if Kaplay is already running to prevent double-initialization
 if (typeof add === 'undefined') {
     kaplay({
-        width: 1600,
+        width: 800,
         height: 800,
         scale: 1,
         background: [50, 50, 50], // Grey background to see canvas edges
         root: document.querySelector(".game-container"),
         debug: true,
         pixelDensity: 1,
-        letterbox: false, // Keeps aspect ratio correct in fullscreen
+        letterbox: true, // Keeps aspect ratio correct in fullscreen
     });
 }
 

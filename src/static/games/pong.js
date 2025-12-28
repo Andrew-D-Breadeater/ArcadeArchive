@@ -1,15 +1,26 @@
 // src/static/games/pong.js
 
+const COLORS = {
+    BACKGROUND: [253, 246, 227], // Cream
+    PADDLE: [46, 125, 50],       // Green
+    BALL: [46, 125, 50],         // Green
+    SCORE_TEXT: [76, 175, 80],   // Bright Green
+    INFO_TEXT: [76, 175, 80],      // Bright Green
+    GAME_OVER_TEXT: [76, 175, 80], // Bright Green
+    RESTART_TEXT: [255, 255, 255], // White
+};
+
 // 1. Initialize Kaplay
 if (typeof add === 'undefined') {
     kaplay({
-        background: [29, 43, 83],
+        background: COLORS.BACKGROUND,
         width: 800,
         height: 400,
-        scale: 2,
+        scale: 1,
         root: document.querySelector(".game-container"),
         debug: true,
-        letterbox: false,
+        letterbox: true,
+        font: 'VT323',
     });
 }
 
@@ -17,66 +28,133 @@ scene("main", () => {
 
     // --- SETTINGS ---
     const ACCEL = 30;         
-    const FRICTION = 0.65;    
+    const FRICTION = 0.35;    
     const AI_ERROR_RANGE = 50; 
-    const AI_FOCUS_SPEED = 2.6; 
-    const WIN_SCORE = 3;      // First to 3 wins
+    const AI_FOCUS_SPEED = 3; 
+    const WIN_SCORE = 3;      
+
+    // --- STATE ---
+    let scoreP1 = 0;
+    let scoreP2 = 0;
+    let matchTime = 0;      
+    let isGameActive = false; 
 
     // --- OBJECTS ---
 
-    // Left Paddle (AI / Player 2)
     const player2 = add([
         rect(20, 100),
         pos(30, height() / 2),
         anchor("center"),
-        color(255, 255, 255),
+        color(...COLORS.PADDLE),
         area(),
         "paddle",
         "player2",
         { currentVelY: 0 }
     ]);
 
-    // Right Paddle (Player 1)
     const player1 = add([
         rect(20, 100),
         pos(width() - 30, height() / 2),
         anchor("center"),
-        color(255, 255, 255),
+        color(...COLORS.PADDLE),
         area(),
         "paddle",
         "player1",
         { currentVelY: 0 } 
     ]);
 
-    // Ball
     const ball = add([
         rect(15, 15),
         pos(center()),
         anchor("center"),
-        color(255, 255, 255),
+        color(...COLORS.BALL),
         area(),
-        { vel: vec2(400, 400) }, 
+        { vel: vec2(0, 0) }, 
         "ball",
     ]);
 
-    // Score Variables
-    let scoreP1 = 0;
-    let scoreP2 = 0;
-
-    // Score UI (Displays "0 - 0")
+    // UI Layer
     const scoreLabel = add([
-        text("0 - 0"),
+        text("0 - 0", { size: 48 }),
         pos(center().x, 50),
         anchor("center"),
-        color(255, 255, 255),
+        color(...COLORS.SCORE_TEXT),
+        z(50)
+    ]);
+
+    const infoLabel = add([
+        text(""),
+        pos(center().x, center().y-35),
+        anchor("center"),
+        color(...COLORS.INFO_TEXT),
+        scale(1.5),
+        z(100) 
     ]);
 
     // --- LOGIC ---
 
     let aiMentalTargetY = height() / 2; 
 
+    // Helper: The Custom Scoring Formula
+    function calculateLeaderboardScore() {
+        const diff = Math.abs(scoreP1 - scoreP2);
+        // Avoid division by zero if time is somehow 0 (instant win?)
+        const t = Math.max(matchTime, 0.01); 
+        
+        let finalScore = (diff * 100) / t;
+
+        if (scoreP1 > scoreP2) {
+            // Player Won: Reward big difference
+            finalScore *= (2 * diff);
+        } else {
+            // Player Lost: Penalize big difference
+            finalScore *= (1 / Math.max(diff, 1));
+        }
+
+        return Math.round(finalScore);
+    }
+
+    // Helper: Countdown Sequence
+    function startRound() {
+        isGameActive = false;
+        
+        // Reset positions
+        ball.pos = center();
+        ball.vel = vec2(0, 0); 
+        player1.pos.y = height() / 2;
+        player2.pos.y = height() / 2;
+        player1.currentVelY = 0;
+        player2.currentVelY = 0;
+
+        // Countdown Animation
+        infoLabel.text = "3";
+        wait(1, () => {
+            infoLabel.text = "2";
+            wait(1, () => {
+                infoLabel.text = "1";
+                wait(1, () => {
+                    infoLabel.text = "GO!";
+                    // Launch Ball
+                    const dirX = choose([-1, 1]);
+                    const dirY = rand(-0.8, 0.8);
+                    ball.vel = vec2(dirX * 400, dirY * 400);
+                    
+                    isGameActive = true; 
+                    
+                    wait(0.5, () => {
+                        infoLabel.text = "";
+                    });
+                });
+            });
+        });
+    }
+
     onUpdate(() => {
-        // --- 1. PLAYER 1 MOVEMENT (Right Side) ---
+        if (!isGameActive) return;
+
+        matchTime += dt();
+
+        // --- 1. PLAYER 1 MOVEMENT ---
         const p1TargetY = mousePos().y;
         const p1Diff = p1TargetY - player1.pos.y;
 
@@ -87,7 +165,7 @@ scene("main", () => {
         if (player1.pos.y < 50) { player1.pos.y = 50; player1.currentVelY = 0; }
         if (player1.pos.y > height() - 50) { player1.pos.y = height() - 50; player1.currentVelY = 0; }
 
-        // --- 2. PLAYER 2 MOVEMENT (Left Side / AI) ---
+        // --- 2. PLAYER 2 MOVEMENT (AI) ---
         let realTargetY = height() / 2;
 
         if (ball.vel.x < 0) {
@@ -110,58 +188,59 @@ scene("main", () => {
         // --- 3. BALL MOVEMENT ---
         ball.move(ball.vel.x, ball.vel.y);
 
-        // Bounce off Top/Bottom
         if (ball.pos.y < 0 && ball.vel.y < 0) ball.vel.y = -ball.vel.y;
         if (ball.pos.y > height() && ball.vel.y > 0) ball.vel.y = -ball.vel.y;
 
         // --- SCORING LOGIC ---
         
-        // Ball goes past Player 1 (Right Wall) -> AI Scores
         if (ball.pos.x > width()) {
             scoreP2++;
-            updateGame("AI Scores!");
+            handlePoint("AI Scores!");
         }
 
-        // Ball goes past Player 2 (Left Wall) -> Player Scores
         if (ball.pos.x < 0) {
             scoreP1++;
-            updateGame("You Score!");
+            handlePoint("You Score!");
         }
     });
 
-    // Helper to handle scoring, resetting, and checking win condition
-    function updateGame(message) {
-        shake(1);
+    function handlePoint(message) {
+        shake(10);
         scoreLabel.text = `${scoreP2} - ${scoreP1}`;
+        infoLabel.text = message;
         
+        isGameActive = false; 
+
         // Check for Match Win
         if (scoreP1 >= WIN_SCORE || scoreP2 >= WIN_SCORE) {
-            // Submit the player's score (e.g., 3 if they won, 1 if they lost)
-            window.handleGameOver(scoreP1); 
-            go("gameover", { winner: scoreP1 >= WIN_SCORE ? "YOU WIN!" : "AI WINS!" });
+            const calculatedScore = calculateLeaderboardScore();
+            const winnerText = scoreP1 >= WIN_SCORE ? "YOU WIN!" : "AI WINS!";
+            
+            wait(1.5, () => {
+                window.handleGameOver(calculatedScore); 
+                go("gameover", { 
+                    winner: winnerText,
+                    score: calculatedScore
+                });
+            });
         } else {
-            // Reset Ball for next point
-            resetBall();
+            // Next Round
+            wait(1.5, () => {
+                startRound();
+            });
         }
-    }
-
-    function resetBall() {
-        ball.pos = center();
-        // Launch ball towards the person who just lost the point? 
-        // Or random X direction, random Y angle
-        ball.vel.x = choose([-400, 400]);
-        ball.vel.y = rand(-400, 400);
     }
 
     // --- COLLISIONS ---
     ball.onCollide("paddle", () => {
         ball.vel.x = -ball.vel.x;
-        // Speed up slightly on every hit
         ball.vel.x *= 1.05;
         ball.vel.y *= 1.05;
-        shake(0.25);
-        // Note: No score increase here anymore, only on wall hit
+        shake(0.5);
     });
+
+    // Start the first round
+    startRound();
 });
 
 scene("gameover", (data) => {
@@ -169,14 +248,21 @@ scene("gameover", (data) => {
         text(data.winner),
         pos(center().x, center().y - 100),
         anchor("center"),
-        color(255, 255, 255),
+        color(...COLORS.GAME_OVER_TEXT),
+    ]);
+    add([
+        text(`Score: ${data.score}`),
+        pos(center().x, center().y+120),
+        anchor("center"),
+        scale(0.8),
+        color(...COLORS.GAME_OVER_TEXT),
     ]);
     add([
         text("Press Play to Restart"),
-        pos(center().x, center().y + 100),
+        pos(center().x, center().y + 90),
         anchor("center"),
         scale(0.5),
-        color(255, 255, 255),
+        color(...COLORS.RESTART_TEXT),
     ]);
 });
 

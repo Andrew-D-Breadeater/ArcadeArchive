@@ -176,10 +176,10 @@
 .game-container {
     background-color: var(--card-bg);
     border: 2px solid var(--border-dark-green);
-    
+
     /* Windowed Mode Size */
-    width: 80%; 
-    height: 400px;     
+    width: 80%;
+    height: 400px;
     margin: 2rem auto;
     display: flex;
     justify-content: center;
@@ -207,6 +207,7 @@
     max-height: 100%;
     margin: 0;
     border: var(--border-dark-green) 2px solid;
+
 }
 
 .game-container #play-button {
@@ -214,7 +215,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 20; /* Ensure it sits ON TOP of the canvas */
+    z-index: 20;
+    /* Ensure it sits ON TOP of the canvas */
 }
 
 
