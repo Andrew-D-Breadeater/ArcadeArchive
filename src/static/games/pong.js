@@ -7,7 +7,7 @@ const COLORS = {
     SCORE_TEXT: [76, 175, 80],   // Bright Green
     INFO_TEXT: [76, 175, 80],      // Bright Green
     GAME_OVER_TEXT: [76, 175, 80], // Bright Green
-    RESTART_TEXT: [255, 255, 255], // White
+    RESTART_TEXT: [76, 175, 80], // Bright Green
 };
 
 // 1. Initialize Kaplay

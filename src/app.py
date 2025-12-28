@@ -46,25 +46,32 @@ GAMES = [
         'description': 'A classic paddle game.'
     },
     {
-        'id': 'snake',
-        'name': 'Snake',
-        'description': "Don't eat your own tail!"
+      'id': 'breakout',
+      'name': 'Breakout',
+      'description': 'Break all the bricks with your ball and paddle.' 
     },
-    {
-        'id': 'tetris',
-        'name': 'Tetris',
-        'description': 'Clear the lines.'
-    },
-    {
-        'id': 'sokoban',
-        'name': 'Sokoban',
-        'description': 'Push the boxes to their places.'
-    },
-    {
-        'id': 'testgame',
-        'name': 'Testgame',
-        'description': 'Only for testing purposes.'
-    }
+    
+    # {
+    #     'id': 'snake',
+    #     'name': 'Snake',
+    #     'description': "Don't eat your own tail!"
+    # },
+    # {
+    #     'id': 'tetris',
+    #     'name': 'Tetris',
+    #     'description': 'Clear the lines.'
+    # },
+    # {
+    #     'id': 'sokoban',
+    #     'name': 'Sokoban',
+    #     'description': 'Push the boxes to their places.'
+    # },
+    # {
+    #     'id': 'testgame',
+    #     'name': 'Testgame',
+    #     'description': 'Only for testing purposes.'
+    # }
+    
 ]
 
 #---ROUTES---

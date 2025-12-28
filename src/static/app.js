@@ -217,7 +217,7 @@ async function initGamePage() {
         });
 
         function loadGameScript() {
-            const allowedGames = ['pong', 'snake', 'tetris', 'sokoban','testgame'];
+            const allowedGames = ['pong', 'snake', 'tetris', 'sokoban','breakout','testgame'];
             if (!allowedGames.includes(gameName)) {
                 alert("Game not found!");
                 return;
