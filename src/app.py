@@ -51,11 +51,11 @@ GAMES = [
       'description': 'Break all the bricks with your ball and paddle.' 
     },
     
-    # {
-    #     'id': 'snake',
-    #     'name': 'Snake',
-    #     'description': "Don't eat your own tail!"
-    # },
+    {
+        'id': 'snake',
+        'name': 'Snake',
+        'description': "Don't eat your own tail!"
+    },
     # {
     #     'id': 'tetris',
     #     'name': 'Tetris',

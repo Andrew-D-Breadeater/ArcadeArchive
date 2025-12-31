@@ -2,9 +2,10 @@
 
 // --- CONFIGURATION ---
 const COLORS = {
-    BACKGROUND: [29, 43, 83],
-    PADDLE: [255, 255, 255],
-    BALL: [255, 255, 255],
+    BACKGROUND: [253, 246, 227], // Cream,
+    LETTERBOX_BG: [245, 239, 220], // Dark cream
+    PADDLE: [46, 125, 50],       // Green
+    BALL: [46, 125, 50],         // Green
     BLOCKS: [
         [255, 0, 77],   // Red
         [255, 163, 0],  // Orange
@@ -12,8 +13,7 @@ const COLORS = {
         [0, 228, 54],   // Green
         [41, 173, 255], // Blue
     ],
-    TEXT: [255, 255, 255],
-    LETTERBOX: [20, 20, 20],
+    TEXT: [76, 175, 80], // Bright Green
 };
 
 // 1. Initialize Kaplay

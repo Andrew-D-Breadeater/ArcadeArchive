@@ -2,6 +2,7 @@
 
 const COLORS = {
     BACKGROUND: [253, 246, 227], // Cream
+    LETTERBOX_BG: [245, 239, 220], // Dark cream
     PADDLE: [46, 125, 50],       // Green
     BALL: [46, 125, 50],         // Green
     SCORE_TEXT: [76, 175, 80],   // Bright Green
@@ -13,7 +14,7 @@ const COLORS = {
 // 1. Initialize Kaplay
 if (typeof add === 'undefined') {
     kaplay({
-        background: COLORS.BACKGROUND,
+        background: COLORS.LETTERBOX_BG,
         width: 800,
         height: 400,
         scale: 1,
@@ -26,18 +27,27 @@ if (typeof add === 'undefined') {
 
 scene("main", () => {
 
+    // --- DRAW GAME BOARD BACKGROUND ---
+    add([
+        rect(width(), height()), // Fill the logical game size (800x600)
+        pos(0, 0),
+        color(...COLORS.BACKGROUND),
+        z(-100), // Put it waaaay in the back
+        "game_background" // Tag it just in case
+    ]);
+
     // --- SETTINGS ---
-    const ACCEL = 30;         
-    const FRICTION = 0.35;    
-    const AI_ERROR_RANGE = 50; 
-    const AI_FOCUS_SPEED = 3; 
-    const WIN_SCORE = 3;      
+    const ACCEL = 30;
+    const FRICTION = 0.35;
+    const AI_ERROR_RANGE = 50;
+    const AI_FOCUS_SPEED = 3;
+    const WIN_SCORE = 3;
 
     // --- STATE ---
     let scoreP1 = 0;
     let scoreP2 = 0;
-    let matchTime = 0;      
-    let isGameActive = false; 
+    let matchTime = 0;
+    let isGameActive = false;
 
     // --- OBJECTS ---
 
@@ -60,7 +70,7 @@ scene("main", () => {
         area(),
         "paddle",
         "player1",
-        { currentVelY: 0 } 
+        { currentVelY: 0 }
     ]);
 
     const ball = add([
@@ -69,7 +79,7 @@ scene("main", () => {
         anchor("center"),
         color(...COLORS.BALL),
         area(),
-        { vel: vec2(0, 0) }, 
+        { vel: vec2(0, 0) },
         "ball",
     ]);
 
@@ -84,23 +94,23 @@ scene("main", () => {
 
     const infoLabel = add([
         text(""),
-        pos(center().x, center().y-35),
+        pos(center().x, center().y - 35),
         anchor("center"),
         color(...COLORS.INFO_TEXT),
         scale(1.5),
-        z(100) 
+        z(100)
     ]);
 
     // --- LOGIC ---
 
-    let aiMentalTargetY = height() / 2; 
+    let aiMentalTargetY = height() / 2;
 
     // Helper: The Custom Scoring Formula
     function calculateLeaderboardScore() {
         const diff = Math.abs(scoreP1 - scoreP2);
         // Avoid division by zero if time is somehow 0 (instant win?)
-        const t = Math.max(matchTime, 0.01); 
-        
+        const t = Math.max(matchTime, 0.01);
+
         let finalScore = (diff * 100) / t;
 
         if (scoreP1 > scoreP2) {
@@ -117,10 +127,10 @@ scene("main", () => {
     // Helper: Countdown Sequence
     function startRound() {
         isGameActive = false;
-        
+
         // Reset positions
         ball.pos = center();
-        ball.vel = vec2(0, 0); 
+        ball.vel = vec2(0, 0);
         player1.pos.y = height() / 2;
         player2.pos.y = height() / 2;
         player1.currentVelY = 0;
@@ -138,9 +148,9 @@ scene("main", () => {
                     const dirX = choose([-1, 1]);
                     const dirY = rand(-0.8, 0.8);
                     ball.vel = vec2(dirX * 400, dirY * 400);
-                    
-                    isGameActive = true; 
-                    
+
+                    isGameActive = true;
+
                     wait(0.5, () => {
                         infoLabel.text = "";
                     });
@@ -192,7 +202,7 @@ scene("main", () => {
         if (ball.pos.y > height() && ball.vel.y > 0) ball.vel.y = -ball.vel.y;
 
         // --- SCORING LOGIC ---
-        
+
         if (ball.pos.x > width()) {
             scoreP2++;
             handlePoint("AI Scores!");
@@ -208,17 +218,17 @@ scene("main", () => {
         shake(10);
         scoreLabel.text = `${scoreP2} - ${scoreP1}`;
         infoLabel.text = message;
-        
-        isGameActive = false; 
+
+        isGameActive = false;
 
         // Check for Match Win
         if (scoreP1 >= WIN_SCORE || scoreP2 >= WIN_SCORE) {
             const calculatedScore = calculateLeaderboardScore();
             const winnerText = scoreP1 >= WIN_SCORE ? "YOU WIN!" : "AI WINS!";
-            
+
             wait(1.5, () => {
-                window.handleGameOver(calculatedScore); 
-                go("gameover", { 
+                window.handleGameOver(calculatedScore);
+                go("gameover", {
                     winner: winnerText,
                     score: calculatedScore
                 });
@@ -252,7 +262,7 @@ scene("gameover", (data) => {
     ]);
     add([
         text(`Score: ${data.score}`),
-        pos(center().x, center().y+120),
+        pos(center().x, center().y + 120),
         anchor("center"),
         scale(0.8),
         color(...COLORS.GAME_OVER_TEXT),
